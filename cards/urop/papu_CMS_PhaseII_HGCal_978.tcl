@@ -102,7 +102,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /local/bmaier/papu/data/PileUp.data
+  set PileUpFile /data/t3home000/bmaier/papu/pythia8/PileUp.data
 
   # average expected pile up
   set MeanPileUp 140
