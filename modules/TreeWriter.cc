@@ -591,6 +591,9 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
 
   //std::cout << "Calling ParticleFlowCandidates" << std::endl;
 
+  //auto comp_pt = [](auto &a, auto &b) { return a.candidate->Momentum.Pt() > b.candidate->Momentum.Pt(); };
+  //sort(array->begin(), array->end(), comp_pt);
+
   TIter iterator(array);
   Candidate *candidate = 0;
   Candidate *particle = 0;
@@ -652,6 +655,10 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
 
     e = momentum.E();
     pt = momentum.Pt();
+    eta = momentum.Eta();
+    //if (position.Eta() != momentum.Eta())
+    //std::cout << position.Eta() - momentum.Eta() << std::endl;
+
     p = momentum.P();
     phi = momentum.Phi();
     ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
@@ -663,6 +670,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Phi = phi;
     entry->CtgTheta = ctgTheta;
 
+    //if (candidate->PID == 22)
     //std::cout << "Reconstructed PID, PT, ETA, PHI, E:   " << candidate->PID << " " << pt << " " << momentum.Eta() << " " << phi << " " << e << std::endl;
 
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));

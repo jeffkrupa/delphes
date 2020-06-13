@@ -1,4 +1,3 @@
-
 #
 # Makefile for ExRootAnalysis
 #
@@ -217,7 +216,15 @@ PapuDelphes$(ExeSuf): \
 
 tmp/readers/PapuDelphes.$(ObjSuf): \
 	readers/PapuDelphes.cpp \
-	readers/PapuObj.h \
+	external/ExRootAnalysis/ExRootProgressBar.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h
+
+ClusterDelphes$(ExeSuf): \
+	tmp/readers/ClusterDelphes.$(ObjSuf)
+
+tmp/readers/ClusterDelphes.$(ObjSuf): \
+	readers/ClusterDelphes.cpp \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h
@@ -273,6 +280,7 @@ tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 EXECUTABLE +=  \
 	PapuDelphes$(ExeSuf) \
+	ClusterDelphes$(ExeSuf) \
 	DelphesHepMC$(ExeSuf) \
 	DelphesLHEF$(ExeSuf) \
 	DelphesROOT$(ExeSuf) \
@@ -280,6 +288,7 @@ EXECUTABLE +=  \
 
 EXECUTABLE_OBJ +=  \
 	tmp/readers/PapuDelphes.$(ObjSuf) \
+	tmp/readers/ClusterDelphes.$(ObjSuf) \
 	tmp/readers/DelphesHepMC.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
 	tmp/readers/DelphesROOT.$(ObjSuf) \
