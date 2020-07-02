@@ -172,7 +172,7 @@ private:
 template <int K, int N>
 class HierarchicalOrdering {
 public:
-    HierarchicalOrdering() { }
+    HierarchicalOrdering(int max_depth=-1): _max_depth(max_depth) { }
 
     vector<Cluster> 
     fit(vector<PFCand> &particles)
@@ -181,7 +181,7 @@ public:
         for (auto& p : particles)
             p_particles.push_back(&p);
 
-        auto clusters = _recursive_fit(p_particles);
+        auto clusters = _recursive_fit(p_particles, 0);
         for (auto& c : clusters)
           c.finalize();
         return clusters;
@@ -189,15 +189,15 @@ public:
     
 private:
     vector<Cluster> 
-    _recursive_fit(const vector<PFCand*> &particles)
+    _recursive_fit(const vector<PFCand*> &particles, int depth)
     {
         vector<Cluster> clusters;
 
         auto kmeans = KMeans<K>(particles);
         for (int i_k=0; i_k!=K; ++i_k) {
             auto cluster = kmeans.get_clusters()[i_k];
-            if (cluster.size() > N) {
-                auto split_clusters = _recursive_fit(cluster);
+            if (cluster.size() > N && depth != _max_depth) {
+                auto split_clusters = _recursive_fit(cluster, depth+1);
                 for (auto& c : split_clusters) {
                     clusters.push_back(c);
                 }
@@ -207,6 +207,8 @@ private:
         }
         return clusters;
     }
+
+    int _max_depth;
 };
 
 template <typename T>
