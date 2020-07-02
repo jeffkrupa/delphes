@@ -102,7 +102,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /local/bmaier/papu/data/PileUp.data
+  set PileUpFile /tmp/PileUp_450.data
 
   # average expected pile up
   set MeanPileUp 140
@@ -1079,7 +1079,7 @@ module TreeWriter TreeWriter {
   add Branch PileUpMerger/stableParticles PileUpMix GenParticle
   add Branch PileUpMerger/vertices GenVertex Vertex
 
-  #add Branch GenJetFinder/jets GenJet Jet
+  add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
 
 ##  add Branch HCal/eflowTracks EFlowTrack Track

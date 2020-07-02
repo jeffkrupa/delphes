@@ -38,7 +38,11 @@ struct PFCand
   float pdgid = 0;
   float hardfrac = 1;  
   float cluster_idx = -1;
+  float cluster_hardch_pt = 0;
+  float cluster_puch_pt = 0;
+  float cluster_r = 0;
   float vtxid = -1;
+  float npv = 0;
 };
 
 
@@ -48,19 +52,40 @@ public:
   {
     for (auto* p : *this) {
       _sum_pt += p->pt;
+      if (p->vtxid==0){
+	_hardch_pt += p->pt;
+	//std::cout << _hardch_pt << std::endl;
+      }
+      else if (p->vtxid==1){
+	_puch_pt += p->pt;
+      }
       _eta += p->pt * p->eta;
       _phi += p->pt * p->phi;
     }
     _eta /= _sum_pt;
     _phi /= _sum_pt;
+
+    //if (_hardch_pt>90)
+    //std::cout << _hardch_pt << std::endl;
+
+    float largest_dr = -1.;
+    for (auto* p : *this) {
+      auto dr = pow(_eta - p->eta, 2) + pow(_phi - p->phi, 2);
+      if (dr > largest_dr)
+	largest_dr = dr;
+    }
+    _r = largest_dr;
   }
 
   float eta() { return _eta; }
   float phi() { return _phi; }
   float sum_pt() { return _sum_pt; }
+  float hardch_pt() { return _hardch_pt; }
+  float puch_pt() { return _puch_pt; }
+  float r() { return _r; }
 
 private:
-  float _eta=0, _phi=0, _sum_pt=0;
+  float _eta=0, _phi=0, _sum_pt=0, _hardch_pt=0, _puch_pt=0, _r=0;
 
 };
 
@@ -220,18 +245,24 @@ int main(int argc, char *argv[])
 
   unsigned int nevt = itree->GetEntries();
   TBranch* pfbranch = (TBranch*)itree->GetBranch("ParticleFlowCandidate");
+  TBranch* genjetbranch = (TBranch*)itree->GetBranch("GenJet");
   std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
 
   vector<PFCand> output_particles;
   output_particles.reserve(NMAX);
 
-  vector<float> vpt, veta, vphi, ve, vpuppi, vpdgid, vhardfrac, vcluster_idx, vvtxid;
+  vector<float> vpt, veta, vphi, ve, vpuppi, vpdgid, vhardfrac, vcluster_idx, vvtxid, vcluster_r, vcluster_hardch_pt, vcluster_puch_pt, vnpv;
   vpt.reserve(NMAX); veta.reserve(NMAX); vphi.reserve(NMAX); 
   ve.reserve(NMAX); vpuppi.reserve(NMAX); vpdgid.reserve(NMAX); 
   vhardfrac.reserve(NMAX); vcluster_idx.reserve(NMAX); vvtxid.reserve(NMAX);
-  float genmet=-99., genmetphi=-99.;
+  vcluster_r.reserve(NMAX); vcluster_hardch_pt.reserve(NMAX); vcluster_puch_pt.reserve(NMAX);
+  vnpv.reserve(NMAX);
 
+  float genmet=-99., genmetphi=-99.;
+  float genjet1pt=-99., genjet1eta=-99., genjet1phi=-99., genjet1e=-99.;
+  float genjet2pt=-99., genjet2eta=-99., genjet2phi=-99., genjet2e=-99.;
+  
   tout->Branch("pt", &vpt);
   tout->Branch("eta", &veta);
   tout->Branch("phi", &vphi);
@@ -240,11 +271,21 @@ int main(int argc, char *argv[])
   tout->Branch("pdgid", &vpdgid);
   tout->Branch("hardfrac", &vhardfrac);
   tout->Branch("cluster_idx", &vcluster_idx);
+  tout->Branch("cluster_r", &vcluster_r);
+  tout->Branch("cluster_hardch_pt", &vcluster_hardch_pt);
+  tout->Branch("cluster_puch_pt", &vcluster_puch_pt);
   tout->Branch("vtxid", &vvtxid);
-  //tout->Branch("genmet", genmet);
-  //tout->Branch("genmetphi", genmetphi);
+  tout->Branch("npv", &vnpv);
   TBranch* b_genmet = tout->Branch("genmet",&genmet, "genmet/F");
   TBranch* b_genmetphi = tout->Branch("genmetphi",&genmetphi, "genmetphi/F");
+  TBranch* b_genjet1pt = tout->Branch("genjet1pt",&genjet1pt, "genjet1pt/F");
+  TBranch* b_genjet1eta = tout->Branch("genjet1eta",&genjet1eta, "genjet1eta/F");
+  TBranch* b_genjet1phi = tout->Branch("genjet1phi",&genjet1phi, "genjet1phi/F");
+  TBranch* b_genjet1e = tout->Branch("genjet1e",&genjet1e, "genjet1e/F");
+  TBranch* b_genjet2pt = tout->Branch("genjet2pt",&genjet2pt, "genjet2pt/F");
+  TBranch* b_genjet2eta = tout->Branch("genjet2eta",&genjet2eta, "genjet2eta/F");
+  TBranch* b_genjet2phi = tout->Branch("genjet2phi",&genjet2phi, "genjet2phi/F");
+  TBranch* b_genjet2e = tout->Branch("genjet2e",&genjet2e, "genjet2e/F");
 
   auto ho = HierarchicalOrdering<4, 10>();
   //auto ho = HierarchicalOrdering<4, 30>();
@@ -257,14 +298,37 @@ int main(int argc, char *argv[])
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
     
+    float npv = itree->GetLeaf("Vertex_size")->GetValue(0);
     genmet = itree->GetLeaf("GenMissingET.MET")->GetValue(0);
     genmetphi = itree->GetLeaf("GenMissingET.Phi")->GetValue(0);
+
+    unsigned int ngenjets = genjetbranch->GetEntries();
+    ngenjets = itree->GetLeaf("GenJet_size")->GetValue(0);
+    for (unsigned int j=0; j<ngenjets; j++){
+      if (j>1)
+	break;
+      TLorentzVector tmpjet;
+      tmpjet.SetPtEtaPhiM(itree->GetLeaf("GenJet.PT")->GetValue(j),itree->GetLeaf("GenJet.Eta")->GetValue(j),itree->GetLeaf("GenJet.Phi")->GetValue(j),itree->GetLeaf("GenJet.Mass")->GetValue(j));
+      if (j==0){
+	genjet1pt = tmpjet.Pt();
+	genjet1eta = tmpjet.Eta();
+	genjet1phi = tmpjet.Phi();
+	genjet1e = tmpjet.E();
+      }
+      if (j==1){
+	genjet2pt = tmpjet.Pt();
+	genjet2eta = tmpjet.Eta();
+	genjet2phi = tmpjet.Phi();
+	genjet2e = tmpjet.E();
+      }      
+    }
 
     input_particles.clear();
     unsigned int npfs = pfbranch->GetEntries();
     npfs = itree->GetLeaf("ParticleFlowCandidate_size")->GetValue(0);
     for (unsigned int j=0; j<npfs; j++){
       PFCand tmppf;
+      tmppf.npv = npv;
       tmppf.pt = itree->GetLeaf("ParticleFlowCandidate.PT")->GetValue(j);
       tmppf.eta = itree->GetLeaf("ParticleFlowCandidate.Eta")->GetValue(j);
       tmppf.phi = itree->GetLeaf("ParticleFlowCandidate.Phi")->GetValue(j);
@@ -318,6 +382,15 @@ int main(int argc, char *argv[])
     for (auto& cluster : sorted_clusters) {
       for (auto* p : cluster) {
         p->cluster_idx = cluster_idx;
+	p->cluster_hardch_pt = cluster.hardch_pt();
+	p->cluster_puch_pt = cluster.puch_pt();
+	p->cluster_r = cluster.r();
+
+	//if (p->cluster_hardch_pt>90)
+	//std::cout << "WTF: " << p->cluster_hardch_pt << std::endl;
+	//std::cout << "Hard: " << p->cluster_hardch_pt << std::endl;
+	//std::cout << "PU: " << p->cluster_puch_pt << std::endl;
+	
         output_particles.push_back(*p); 
       }
       ++cluster_idx;
@@ -333,7 +406,11 @@ int main(int argc, char *argv[])
     fill(vpdgid, output_particles, [](PFCand& p) { return p.pdgid; }); 
     fill(vhardfrac, output_particles, [](PFCand& p) { return p.hardfrac; }); 
     fill(vcluster_idx, output_particles, [](PFCand& p) { return p.cluster_idx; }); 
+    fill(vcluster_r, output_particles, [](PFCand& p) { return p.cluster_r; }); 
+    fill(vcluster_hardch_pt, output_particles, [](PFCand& p) { return p.cluster_hardch_pt; }); 
+    fill(vcluster_puch_pt, output_particles, [](PFCand& p) { return p.cluster_puch_pt; }); 
     fill(vvtxid, output_particles, [](PFCand& p) { return p.vtxid; }); 
+    fill(vnpv, output_particles, [](PFCand& p) { return p.npv; }); 
     
     tout->Fill();
 
