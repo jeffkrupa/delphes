@@ -15,6 +15,7 @@
 #include "TTree.h"
 #include "TLeaf.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
@@ -33,6 +34,8 @@ struct PFCand
   float pt = 0;
   float eta = 0;
   float phi = 0;
+  float x = 0; // cos and sin phi
+  float y = 0;
   float e = 0;
   float puppi = 1;
   float pdgid = 0;
@@ -46,10 +49,18 @@ struct PFCand
 };
 
 
+float xy_to_phi(float x, float y) {
+  float phi = TMath::ACos(x);
+  return (y < 0) ? -phi : phi;
+}
+
+
 class Cluster : public vector<PFCand*> {
 public:
   void finalize () 
   {
+    float _x = 0, _y = 0;
+
     for (auto* p : *this) {
       _sum_pt += p->pt;
       if (p->vtxid==0){
@@ -60,21 +71,25 @@ public:
 	_puch_pt += p->pt;
       }
       _eta += p->pt * p->eta;
-      _phi += p->pt * p->phi;
+      _x += p->pt * p->x;
+      _y += p->pt * p->y;
     }
     _eta /= _sum_pt;
-    _phi /= _sum_pt;
+    _x /= _sum_pt;
+    _y /= _sum_pt;
 
     //if (_hardch_pt>90)
     //std::cout << _hardch_pt << std::endl;
 
     float largest_dr = -1.;
     for (auto* p : *this) {
-      auto dr = pow(_eta - p->eta, 2) + pow(_phi - p->phi, 2);
+      auto dr = pow(_eta - p->eta, 2) + pow(_x - p->x, 2) + pow(_y - p->y, 2);
       if (dr > largest_dr)
 	largest_dr = dr;
     }
     _r = largest_dr;
+
+    _phi = xy_to_phi(_x, _y);
   }
 
   float eta() { return _eta; }
@@ -109,7 +124,8 @@ public:
                 if (!found) {
                     i_centroids[i] = i_p;
                     centroids[i][0] = particles[i_p]->eta;
-                    centroids[i][1] = particles[i_p]->phi;
+                    centroids[i][1] = particles[i_p]->x;
+                    centroids[i][2] = particles[i_p]->y;
                     break;
                 }
             }
@@ -126,7 +142,7 @@ public:
     const array<Cluster, K> get_clusters() { return clusters; }
 
 private:
-    array<array<float, 2>, K> centroids;
+    array<array<float, 3>, K> centroids;
     array<Cluster, K> clusters;
 
     void assign_particles(vector<PFCand*> &particles) 
@@ -138,10 +154,12 @@ private:
         for (auto& p : particles) {
             float closest = 99999;
             int i_closest = -1;
-            float eta = p->eta; float phi = p->phi;
+            float eta = p->eta; float x = p->x; float y = p->y;
 
             for (int i=0; i!=K; ++i) {
-                auto dr = pow(eta - centroids[i][0], 2) + pow(phi - centroids[i][1], 2);
+                auto dr = pow(eta - centroids[i][0], 2) 
+			  + pow(x - centroids[i][1], 2)
+			  + pow(y - centroids[i][2], 2);
                 if (dr < closest) {
                     closest = dr;
                     i_closest = i;
@@ -154,14 +172,16 @@ private:
     void update_centroids() 
     {
         for (int i=0; i!=K; ++i) {
-            float eta_sum=0, phi_sum=0;
+            float eta_sum=0, x_sum=0, y_sum=0;
             auto &cluster = clusters[i];
             for (auto& p : cluster) {
                 eta_sum += p->eta;
-                phi_sum += p->phi;
+                x_sum += p->x;
+                y_sum += p->y;
             }
             centroids[i][0] = eta_sum / cluster.size();
-            centroids[i][1] = phi_sum / cluster.size();
+            centroids[i][1] = x_sum / cluster.size();
+            centroids[i][2] = y_sum / cluster.size();
         }
     }
 }; 
@@ -334,6 +354,8 @@ int main(int argc, char *argv[])
       tmppf.pt = itree->GetLeaf("ParticleFlowCandidate.PT")->GetValue(j);
       tmppf.eta = itree->GetLeaf("ParticleFlowCandidate.Eta")->GetValue(j);
       tmppf.phi = itree->GetLeaf("ParticleFlowCandidate.Phi")->GetValue(j);
+      tmppf.x = TMath::Cos(tmppf.phi);
+      tmppf.y = TMath::Sin(tmppf.phi);
       tmppf.e = itree->GetLeaf("ParticleFlowCandidate.E")->GetValue(j);
       tmppf.puppi = itree->GetLeaf("ParticleFlowCandidate.PuppiW")->GetValue(j);
       tmppf.hardfrac = itree->GetLeaf("ParticleFlowCandidate.hardfrac")->GetValue(j);
