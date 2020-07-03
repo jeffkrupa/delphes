@@ -26,7 +26,6 @@ using namespace std;
 
 //---------------------------------------------------------------------------
 
-
 static int NMAX = 9000;
 
 struct PFCand
@@ -50,8 +49,9 @@ struct PFCand
 
 
 float xy_to_phi(float x, float y) {
-  float phi = TMath::ACos(x);
-  return (y < 0) ? -phi : phi;
+  return TMath::ATan2(y, x);
+  // float phi = TMath::ACos(x);
+  // return (y < 0) ? -phi : phi;
 }
 
 
@@ -77,6 +77,10 @@ public:
     _eta /= _sum_pt;
     _x /= _sum_pt;
     _y /= _sum_pt;
+
+    float r = sqrt(pow(_x, 2) + pow(_y, 2));
+    _x /= r;
+    _y /= r;
 
     //if (_hardch_pt>90)
     //std::cout << _hardch_pt << std::endl;
@@ -179,9 +183,17 @@ private:
                 x_sum += p->x;
                 y_sum += p->y;
             }
+
+	    x_sum /= cluster.size();
+	    y_sum /= cluster.size();
+
+	    float r = sqrt(pow(x_sum, 2) + pow(y_sum, 2));
+	    x_sum /= r;
+	    y_sum /= r;
+
             centroids[i][0] = eta_sum / cluster.size();
-            centroids[i][1] = x_sum / cluster.size();
-            centroids[i][2] = y_sum / cluster.size();
+            centroids[i][1] = x_sum;
+            centroids[i][2] = y_sum;
         }
     }
 }; 
@@ -246,7 +258,8 @@ fill(vector<float> &vattr, vector<PFCand> &particles, T fn_attr)
 int main(int argc, char *argv[])
 {
 
-  srand(time(NULL));
+  // srand(time(NULL));
+  srand(777);
 
   if(argc < 3) {
     cout << " Usage: " << "PapuDelphes" << " input_file"
