@@ -258,8 +258,8 @@ fill(vector<float> &vattr, vector<PFCand> &particles, T fn_attr)
 int main(int argc, char *argv[])
 {
 
-  // srand(time(NULL));
-  srand(777);
+  srand(time(NULL));
+  //srand(777);
 
   if(argc < 3) {
     cout << " Usage: " << "PapuDelphes" << " input_file"
