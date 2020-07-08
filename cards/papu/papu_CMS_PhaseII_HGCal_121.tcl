@@ -1087,8 +1087,8 @@ module TreeWriter TreeWriter {
 ##  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   #add Branch PhotonEfficiency/photons Photon Photon
-  #add Branch ElectronEfficiency/electrons Electron Electron
-  #add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
+  add Branch ElectronEfficiency/electrons Electron Electron
+  add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
   #add Branch MuonTightIdEfficiency/muons MuonTight Muon
 
   #add Branch JetEnergyScale/jets Jet Jet
