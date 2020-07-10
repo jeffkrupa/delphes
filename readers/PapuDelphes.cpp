@@ -477,6 +477,7 @@ int main(int argc, char *argv[])
     fill(vcluster_puch_pt, output_particles, [](PFCand& p) { return p.cluster_puch_pt; }); 
     fill(vvtxid, output_particles, [](PFCand& p) { return p.vtxid; }); 
     fill(vnpv, output_particles, [](PFCand& p) { return p.npv; }); 
+    fill(visolep, output_particles, [](PFCand& p) { return p.isolep; }); 
     
     tout->Fill();
 
