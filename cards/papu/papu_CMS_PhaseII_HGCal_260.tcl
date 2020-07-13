@@ -874,9 +874,10 @@ module Isolation ElectronIsolation {
 
   set OutputArray electrons
 
+  set UseRhoCorrection true 
   set DeltaRMax 0.3
   set PTMin 1.0
-  set PTRatioMax 9999.
+  set PTRatioMax 0.4
 
 }
 
@@ -938,9 +939,10 @@ module Isolation MuonIsolation {
 
   set OutputArray muons
 
+  set UseRhoCorrection false
   set DeltaRMax 0.3
   set PTMin 1.0
-  set PTRatioMax 9999.
+  set PTRatioMax 0.25
 
 }
 

@@ -155,7 +155,7 @@ void Isolation::Process()
 {
   Candidate *candidate, *isolation, *object;
   TObjArray *isolationArray;
-  Double_t sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles;
+  Double_t sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles, sumPho;
   Double_t sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
   Bool_t pass = kFALSE;
   Double_t eta = 0.0;
@@ -193,6 +193,7 @@ void Isolation::Process()
     sumChargedNoPU = 0.0;
     sumChargedPU = 0.0;
     sumAllParticles = 0.0;
+    sumPho = 0.0;
 
     itIsolationArray.Reset();
     while((isolation = static_cast<Candidate *>(itIsolationArray.Next())))
@@ -226,6 +227,8 @@ void Isolation::Process()
         else
         {
           sumNeutral += isolationMomentum.Pt();
+	  if (abs(isolation->PID) == 22)
+	    sumPho += isolationMomentum.Pt();
         }
       }
     }
