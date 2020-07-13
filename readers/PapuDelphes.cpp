@@ -282,6 +282,7 @@ int main(int argc, char *argv[])
   unsigned int nevt = itree->GetEntries();
   TBranch* pfbranch = (TBranch*)itree->GetBranch("ParticleFlowCandidate");
   TBranch* genjetbranch = (TBranch*)itree->GetBranch("GenJet");
+  TBranch* genbranch = (TBranch*)itree->GetBranch("PileUpMix");
   TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
   TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
   std::cout << "NEVT: " << nevt << std::endl;
@@ -298,7 +299,7 @@ int main(int argc, char *argv[])
   vnpv.reserve(NMAX);
   visolep.reserve(NMAX);
 
-  float genmet=-99., genmetphi=-99.;
+  float genmet=-99., genmetphi=-99., genUmag=-99., genUphi=-99.;
   float genjet1pt=-99., genjet1eta=-99., genjet1phi=-99., genjet1e=-99.;
   float genjet2pt=-99., genjet2eta=-99., genjet2phi=-99., genjet2e=-99.;
   
@@ -319,6 +320,8 @@ int main(int argc, char *argv[])
   
   TBranch* b_genmet = tout->Branch("genmet",&genmet, "genmet/F");
   TBranch* b_genmetphi = tout->Branch("genmetphi",&genmetphi, "genmetphi/F");
+  TBranch* b_genUmag = tout->Branch("genUmag",&genUmag, "genUmag/F");
+  TBranch* b_genUphi = tout->Branch("genUphi",&genUphi, "genUphi/F");
   TBranch* b_genjet1pt = tout->Branch("genjet1pt",&genjet1pt, "genjet1pt/F");
   TBranch* b_genjet1eta = tout->Branch("genjet1eta",&genjet1eta, "genjet1eta/F");
   TBranch* b_genjet1phi = tout->Branch("genjet1phi",&genjet1phi, "genjet1phi/F");
@@ -342,6 +345,21 @@ int main(int argc, char *argv[])
     float npv = itree->GetLeaf("Vertex_size")->GetValue(0);
     genmet = itree->GetLeaf("GenMissingET.MET")->GetValue(0);
     genmetphi = itree->GetLeaf("GenMissingET.Phi")->GetValue(0);
+
+    // Hadronic recoil
+    TVector2 vMet; vMet.SetMagPhi(genmet,genmetphi);
+    unsigned int ngens = genbranch->GetEntries();
+    ngens = itree->GetLeaf("PileUpMix_size")->GetValue(0);
+
+    for (unsigned int j=0; j<ngens; j++){
+      if (itree->GetLeaf("PileUpMix.PT")->GetValue(j)>10 && itree->GetLeaf("PileUpMix.IsPU")->GetValue(j)==0 && (abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==11 || abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==13)){
+	TVector2 vLep; vLep.SetMagPhi(itree->GetLeaf("PileUpMix.PT")->GetValue(j),itree->GetLeaf("PileUpMix.Phi")->GetValue(j));
+	vMet += vLep;
+      }
+    }
+
+    genUmag = vMet.Mod();
+    genUphi = vMet.Phi();
 
     unsigned int nelectron = electronbranch->GetEntries();
     nelectron = itree->GetLeaf("Electron_size")->GetValue(0);
