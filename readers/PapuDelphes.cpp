@@ -283,8 +283,8 @@ int main(int argc, char *argv[])
   TBranch* pfbranch = (TBranch*)itree->GetBranch("ParticleFlowCandidate");
   TBranch* genjetbranch = (TBranch*)itree->GetBranch("GenJet");
   TBranch* genbranch = (TBranch*)itree->GetBranch("PileUpMix");
-  TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
-  TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
+  //TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
+  //TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
   std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
 
@@ -361,7 +361,8 @@ int main(int argc, char *argv[])
 
     genUmag = vMet.Mod();
     genUphi = vMet.Phi();
-
+    
+    /*
     unsigned int nelectron = electronbranch->GetEntries();
     nelectron = itree->GetLeaf("Electron_size")->GetValue(0);
     unsigned int nmuon = muonbranch->GetEntries();
@@ -374,6 +375,7 @@ int main(int argc, char *argv[])
     for (unsigned int j=0; j<nmuon; j++){
       leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
     }
+    */
 
     unsigned int ngenjets = genjetbranch->GetEntries();
     ngenjets = itree->GetLeaf("GenJet_size")->GetValue(0);
@@ -420,6 +422,7 @@ int main(int argc, char *argv[])
       }
       else
 	tmppf.vtxid = -1;
+      /*
       if ((abs(tmppf.pdgid)==11 || abs(tmppf.pdgid)==13) && tmppf.pt>10){
 	std::vector<float>::iterator it;
 	it = std::find (leptonpt.begin(), leptonpt.end(), tmppf.pt);
@@ -428,7 +431,7 @@ int main(int argc, char *argv[])
 	else
 	  tmppf.isolep = 0;  
       }
-
+      */
       input_particles.push_back(tmppf);
     }
 
