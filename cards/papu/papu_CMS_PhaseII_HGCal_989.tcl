@@ -877,7 +877,7 @@ module Isolation ElectronIsolation {
   set UseRhoCorrection true 
   set DeltaRMax 0.3
   set PTMin 1.0
-  set PTRatioMax 0.4
+  set PTRatioMax 1000
 
 }
 
@@ -942,7 +942,7 @@ module Isolation MuonIsolation {
   set UseRhoCorrection false
   set DeltaRMax 0.3
   set PTMin 1.0
-  set PTRatioMax 0.25
+  set PTRatioMax 1000
 
 }
 

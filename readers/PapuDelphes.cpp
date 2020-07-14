@@ -331,7 +331,8 @@ int main(int argc, char *argv[])
   TBranch* b_genjet2phi = tout->Branch("genjet2phi",&genjet2phi, "genjet2phi/F");
   TBranch* b_genjet2e = tout->Branch("genjet2e",&genjet2e, "genjet2e/F");
 
-  auto ho = HierarchicalOrdering<4, 10>();
+  //auto ho = HierarchicalOrdering<4, 10>();
+  auto ho = HierarchicalOrdering<4, 20>();
   //auto ho = HierarchicalOrdering<4, 30>();
 
   ExRootProgressBar progressBar(nevt);
