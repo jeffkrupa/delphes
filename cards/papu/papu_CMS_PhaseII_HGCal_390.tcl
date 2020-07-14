@@ -86,6 +86,8 @@ set ExecutionPath {
 
   GenParticleFilter
 
+  ZFilter
+
   TreeWriter
 }
 
@@ -1069,6 +1071,16 @@ module StatusPidFilter GenParticleFilter {
 
 }
 
+module PidFilter ZFilter {
+
+    set InputArray  Delphes/allParticles
+    set OutputArray filteredParticles
+    set PTMin 0.0
+    set TargetId 23
+    set OnlyFirst true
+
+}
+
 
 ##################
 # ROOT tree writer
@@ -1077,6 +1089,7 @@ module StatusPidFilter GenParticleFilter {
 module TreeWriter TreeWriter {
 ## add Branch InputArray BranchName BranchClass
 ## add Branch GenParticleFilter/filteredParticles Particle GenParticle
+  add Branch ZFilter/filteredParticles ZBoson GenParticle
 
   add Branch PileUpMerger/stableParticles PileUpMix GenParticle
   add Branch PileUpMerger/vertices GenVertex Vertex
