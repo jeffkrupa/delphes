@@ -455,6 +455,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PhotonID.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
+	modules/PidFilter.h \
 	modules/PdgCodeFilter.h \
 	modules/BeamSpotFilter.h \
 	modules/RecoPuFilter.h \
@@ -1014,6 +1015,15 @@ tmp/modules/StatusPidFilter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/PidFilter.$(ObjSuf): \
+	modules/PidFilter.$(SrcSuf) \
+	modules/PidFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/TaggingParticlesSkimmer.$(ObjSuf): \
 	modules/TaggingParticlesSkimmer.$(SrcSuf) \
 	modules/TaggingParticlesSkimmer.h \
@@ -1228,6 +1238,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/RecoPuFilter.$(ObjSuf) \
 	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
+	tmp/modules/PidFilter.$(ObjSuf) \
 	tmp/modules/TaggingParticlesSkimmer.$(ObjSuf) \
 	tmp/modules/TauTagging.$(ObjSuf) \
 	tmp/modules/TimeSmearing.$(ObjSuf) \
@@ -2334,6 +2345,10 @@ external/fastjet/ClusterSequenceStructure.hh: \
 	@touch $@
 
 modules/StatusPidFilter.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/PidFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
