@@ -422,6 +422,13 @@ int main(int argc, char *argv[])
     std::vector<float> leptonpt;
     //int leptype = 0;
 
+    for (unsigned int j=0; j<nelectron; j++){
+      leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
+    }
+    for (unsigned int j=0; j<nmuon; j++){
+      leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
+    }
+
     float maxleppt = -99;
     bool maxisele = 0;
     if (nelectron>1){
@@ -522,6 +529,14 @@ int main(int argc, char *argv[])
       }
       else
 	tmppf.vtxid = -1;
+      if ((abs(tmppf.pdgid)==11 || abs(tmppf.pdgid)==13) && tmppf.pt>10){
+	std::vector<float>::iterator it;
+	it = std::find (leptonpt.begin(), leptonpt.end(), tmppf.pt);
+	if (it != leptonpt.end())
+	  tmppf.isolep = 1;  
+	else
+	  tmppf.isolep = 0;  
+      }
       input_particles.push_back(tmppf);
     }
 
