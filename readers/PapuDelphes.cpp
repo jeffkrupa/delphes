@@ -422,12 +422,14 @@ int main(int argc, char *argv[])
     std::vector<float> leptonpt;
     //int leptype = 0;
 
+    /*
     for (unsigned int j=0; j<nelectron; j++){
       leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
     }
     for (unsigned int j=0; j<nmuon; j++){
       leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
     }
+    */
 
     float maxleppt = -99;
     bool maxisele = 0;
@@ -451,10 +453,12 @@ int main(int argc, char *argv[])
 	    firstrecpid = itree->GetLeaf("Electron.Charge")->GetValue(j);
 	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("Electron.PT")->GetValue(j),itree->GetLeaf("Electron.Eta")->GetValue(j),itree->GetLeaf("Electron.Phi")->GetValue(j),0.00051099);
 	    vrecZ += tmp;
+	    leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
 	  }
 	  if (firstrecpid == (-1)*itree->GetLeaf("Electron.Charge")->GetValue(j) && itree->GetLeaf("Electron.PT")->GetValue(j)>10){
 	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("Electron.PT")->GetValue(j),itree->GetLeaf("Electron.Eta")->GetValue(j),itree->GetLeaf("Electron.Phi")->GetValue(j),0.00051099);
 	    vrecZ += tmp;
+	    leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
 	    //std::cout << "Dilep rec mass: " << vrecZ.M() << std::endl;
 	    bothrecfound = true;
 	  }
@@ -468,10 +472,12 @@ int main(int argc, char *argv[])
 	    firstpid = itree->GetLeaf("MuonLoose.Charge")->GetValue(j);
 	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("MuonLoose.PT")->GetValue(j),itree->GetLeaf("MuonLoose.Eta")->GetValue(j),itree->GetLeaf("MuonLoose.Phi")->GetValue(j),0.1057);
 	    vrecZ += tmp;
+	    leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
 	  }
 	  if (firstrecpid == (-1)*itree->GetLeaf("MuonLoose.Charge")->GetValue(j) && itree->GetLeaf("MuonLoose.PT")->GetValue(j)>10){
 	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("MuonLoose.PT")->GetValue(j),itree->GetLeaf("MuonLoose.Eta")->GetValue(j),itree->GetLeaf("MuonLoose.Phi")->GetValue(j),0.1057);
 	    vrecZ += tmp;
+	    leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
 	    //std::cout << "Dilep rec mass: " << vrecZ.M() << std::endl;
 	    bothrecfound = true;
 	  }
