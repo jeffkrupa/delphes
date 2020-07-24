@@ -283,9 +283,8 @@ int main(int argc, char *argv[])
   TBranch* pfbranch = (TBranch*)itree->GetBranch("ParticleFlowCandidate");
   TBranch* genjetbranch = (TBranch*)itree->GetBranch("GenJet");
   TBranch* genbranch = (TBranch*)itree->GetBranch("PileUpMix");
-  TBranch* zbosonbranch = (TBranch*)itree->GetBranch("ZBoson");
-  //TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
-  //TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
+  TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
+  TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
   std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
 
@@ -301,7 +300,8 @@ int main(int argc, char *argv[])
   visolep.reserve(NMAX);
 
   float genmet=-99., genmetphi=-99., genUmag=-99., genUphi=-99.;
-  float genZpt=-99., genZeta=-99., genZphi=-99., genZm=-99.;
+  float genZpt=-99., genZeta=-99., genZphi=-99., genZm=-99., genZacc=-99.;
+  float recZpt=-99., recZeta=-99., recZphi=-99., recZm=-99.;
   float genjet1pt=-99., genjet1eta=-99., genjet1phi=-99., genjet1e=-99.;
   float genjet2pt=-99., genjet2eta=-99., genjet2phi=-99., genjet2e=-99.;
   
@@ -320,10 +320,15 @@ int main(int argc, char *argv[])
   tout->Branch("npv", &vnpv);
   tout->Branch("isolep", &visolep);
   
+  TBranch* b_genZacc = tout->Branch("genZacc",&genZacc, "genZpt/F");
   TBranch* b_genZpt = tout->Branch("genZpt",&genZpt, "genZpt/F");
   TBranch* b_genZeta = tout->Branch("genZeta",&genZeta, "genZeta/F");
   TBranch* b_genZphi = tout->Branch("genZphi",&genZphi, "genZphi/F");
   TBranch* b_genZm = tout->Branch("genZm",&genZm, "genZm/F");
+  TBranch* b_recZpt = tout->Branch("recZpt",&recZpt, "recZpt/F");
+  TBranch* b_recZeta = tout->Branch("recZeta",&recZeta, "recZeta/F");
+  TBranch* b_recZphi = tout->Branch("recZphi",&recZphi, "recZphi/F");
+  TBranch* b_recZm = tout->Branch("recZm",&recZm, "recZm/F");
   TBranch* b_genmet = tout->Branch("genmet",&genmet, "genmet/F");
   TBranch* b_genmetphi = tout->Branch("genmetphi",&genmetphi, "genmetphi/F");
   TBranch* b_genUmag = tout->Branch("genUmag",&genUmag, "genUmag/F");
@@ -337,8 +342,8 @@ int main(int argc, char *argv[])
   TBranch* b_genjet2phi = tout->Branch("genjet2phi",&genjet2phi, "genjet2phi/F");
   TBranch* b_genjet2e = tout->Branch("genjet2e",&genjet2e, "genjet2e/F");
 
-  //auto ho = HierarchicalOrdering<4, 10>();
-  auto ho = HierarchicalOrdering<4, 20>();
+  auto ho = HierarchicalOrdering<4, 10>();
+  //auto ho = HierarchicalOrdering<4, 20>();
   //auto ho = HierarchicalOrdering<4, 30>();
 
   ExRootProgressBar progressBar(nevt);
@@ -370,15 +375,10 @@ int main(int argc, char *argv[])
 
     // Z Boson
 
-    unsigned int nzs = genbranch->GetEntries();
-    nzs = 1;
-    for (unsigned int j=0; j<nzs; j++){
-      std::cout << "Z mass: " << itree->GetLeaf("ZBoson.Mass")->GetValue(j);
-    }
-    
-    TLorentzVector vZ;
+    TLorentzVector vZ(0,0,0,0);
     int firstpid = 0;
     bool bothfound = false;
+    bool bothleptonsinacc = true;    
 
     for (unsigned int j=0; j<ngens; j++){
       if (bothfound)
@@ -387,12 +387,15 @@ int main(int argc, char *argv[])
 	firstpid = itree->GetLeaf("PileUpMix.PID")->GetValue(j);
 	TLorentzVector tmp; tmp.SetPtEtaPhiE(itree->GetLeaf("PileUpMix.PT")->GetValue(j),itree->GetLeaf("PileUpMix.Eta")->GetValue(j),itree->GetLeaf("PileUpMix.Phi")->GetValue(j),itree->GetLeaf("PileUpMix.E")->GetValue(j));
 	vZ += tmp;
+	if (abs(itree->GetLeaf("PileUpMix.Eta")->GetValue(j))>4.0)
+	  bothleptonsinacc = false;	
       }
       if (firstpid == (-1)*itree->GetLeaf("PileUpMix.PID")->GetValue(j) && itree->GetLeaf("PileUpMix.IsPU")->GetValue(j)==0 && (abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==11 || abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==13)){
 	TLorentzVector tmp; tmp.SetPtEtaPhiE(itree->GetLeaf("PileUpMix.PT")->GetValue(j),itree->GetLeaf("PileUpMix.Eta")->GetValue(j),itree->GetLeaf("PileUpMix.Phi")->GetValue(j),itree->GetLeaf("PileUpMix.E")->GetValue(j));
 	vZ += tmp;
-	std::cout << "Dilep mass: " << vZ.M() << std::endl;
 	bothfound = true;
+	if (abs(itree->GetLeaf("PileUpMix.Eta")->GetValue(j))>4.0)
+	  bothleptonsinacc = false;
       }
     }
     
@@ -400,22 +403,80 @@ int main(int argc, char *argv[])
     genZeta = vZ.Eta();
     genZphi = vZ.Phi();
     genZm = vZ.M();
+    //std::cout << "Dilep mass: " << vZ.M() << std::endl;
+    if (bothleptonsinacc)
+      genZacc = 1.;
+    else 
+      genZacc = 0.;
 
-    /*
+
+    TLorentzVector vrecZ(0,0,0,0);
+    int firstrecpid = 0;
+    bool bothrecfound = false;    
+
     unsigned int nelectron = electronbranch->GetEntries();
     nelectron = itree->GetLeaf("Electron_size")->GetValue(0);
     unsigned int nmuon = muonbranch->GetEntries();
     nmuon = itree->GetLeaf("MuonLoose_size")->GetValue(0);
 
     std::vector<float> leptonpt;
-    for (unsigned int j=0; j<nelectron; j++){
-      leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
-    }
-    for (unsigned int j=0; j<nmuon; j++){
-      leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
-    }
-    */
+    //int leptype = 0;
 
+    float maxleppt = -99;
+    bool maxisele = 0;
+    if (nelectron>1){
+      maxleppt = itree->GetLeaf("Electron.PT")->GetValue(0);
+      maxisele = 1;
+    }
+    if (nmuon>1){
+      if (itree->GetLeaf("MuonLoose.PT")->GetValue(0)>maxleppt){
+	maxleppt = itree->GetLeaf("MuonLoose.PT")->GetValue(0);
+	maxisele = 0;
+      }
+    }
+
+    if (maxleppt>0){
+      if (maxisele){
+	for (unsigned int j=0; j<nelectron; j++){
+	  if (bothrecfound)
+	    break;
+	  if (firstrecpid == 0 && itree->GetLeaf("Electron.PT")->GetValue(j)>10){
+	    firstrecpid = itree->GetLeaf("Electron.Charge")->GetValue(j);
+	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("Electron.PT")->GetValue(j),itree->GetLeaf("Electron.Eta")->GetValue(j),itree->GetLeaf("Electron.Phi")->GetValue(j),0.00051099);
+	    vrecZ += tmp;
+	  }
+	  if (firstrecpid == (-1)*itree->GetLeaf("Electron.Charge")->GetValue(j) && itree->GetLeaf("Electron.PT")->GetValue(j)>10){
+	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("Electron.PT")->GetValue(j),itree->GetLeaf("Electron.Eta")->GetValue(j),itree->GetLeaf("Electron.Phi")->GetValue(j),0.00051099);
+	    vrecZ += tmp;
+	    //std::cout << "Dilep rec mass: " << vrecZ.M() << std::endl;
+	    bothrecfound = true;
+	  }
+	}
+      }
+      else{
+	for (unsigned int j=0; j<nmuon; j++){
+	  if (bothrecfound)
+	    break;
+	  if (firstrecpid == 0 && itree->GetLeaf("MuonLoose.PT")->GetValue(j)>10){
+	    firstpid = itree->GetLeaf("MuonLoose.Charge")->GetValue(j);
+	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("MuonLoose.PT")->GetValue(j),itree->GetLeaf("MuonLoose.Eta")->GetValue(j),itree->GetLeaf("MuonLoose.Phi")->GetValue(j),0.1057);
+	    vrecZ += tmp;
+	  }
+	  if (firstrecpid == (-1)*itree->GetLeaf("MuonLoose.Charge")->GetValue(j) && itree->GetLeaf("MuonLoose.PT")->GetValue(j)>10){
+	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("MuonLoose.PT")->GetValue(j),itree->GetLeaf("MuonLoose.Eta")->GetValue(j),itree->GetLeaf("MuonLoose.Phi")->GetValue(j),0.1057);
+	    vrecZ += tmp;
+	    //std::cout << "Dilep rec mass: " << vrecZ.M() << std::endl;
+	    bothrecfound = true;
+	  }
+	}
+      }      
+    }
+
+    recZpt = vrecZ.Pt();
+    recZeta = vrecZ.Eta();
+    recZphi = vrecZ.Phi();
+    recZm = vrecZ.M();
+    
     unsigned int ngenjets = genjetbranch->GetEntries();
     ngenjets = itree->GetLeaf("GenJet_size")->GetValue(0);
 
@@ -461,16 +522,6 @@ int main(int argc, char *argv[])
       }
       else
 	tmppf.vtxid = -1;
-      /*
-      if ((abs(tmppf.pdgid)==11 || abs(tmppf.pdgid)==13) && tmppf.pt>10){
-	std::vector<float>::iterator it;
-	it = std::find (leptonpt.begin(), leptonpt.end(), tmppf.pt);
-	if (it != leptonpt.end())
-	  tmppf.isolep = 1;	  
-	else
-	  tmppf.isolep = 0;  
-      }
-      */
       input_particles.push_back(tmppf);
     }
 
