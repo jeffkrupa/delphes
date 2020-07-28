@@ -285,6 +285,7 @@ int main(int argc, char *argv[])
   TBranch* genbranch = (TBranch*)itree->GetBranch("PileUpMix");
   TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
   TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
+  TBranch* zbranch = (TBranch*)itree->GetBranch("ZBoson");
   std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
 
@@ -320,7 +321,7 @@ int main(int argc, char *argv[])
   tout->Branch("npv", &vnpv);
   tout->Branch("isolep", &visolep);
   
-  TBranch* b_genZacc = tout->Branch("genZacc",&genZacc, "genZpt/F");
+  TBranch* b_genZacc = tout->Branch("genZacc",&genZacc, "genZacc/F");
   TBranch* b_genZpt = tout->Branch("genZpt",&genZpt, "genZpt/F");
   TBranch* b_genZeta = tout->Branch("genZeta",&genZeta, "genZeta/F");
   TBranch* b_genZphi = tout->Branch("genZphi",&genZphi, "genZphi/F");
@@ -351,7 +352,7 @@ int main(int argc, char *argv[])
   auto comp_pt = [](auto &a, auto &b) { return a.sum_pt() > b.sum_pt(); };
   auto comp_p4 = [](auto &a, auto &b) { return a.pt > b.pt; };
 
-  for (unsigned int k=0; k<nevt; k++){
+  for (unsigned int k=0; k<100; k++){
     itree->GetEntry(k);
     
     float npv = itree->GetLeaf("Vertex_size")->GetValue(0);
@@ -380,6 +381,7 @@ int main(int argc, char *argv[])
     bool bothfound = false;
     bool bothleptonsinacc = true;    
 
+    /*
     for (unsigned int j=0; j<ngens; j++){
       if (bothfound)
 	break;
@@ -398,11 +400,14 @@ int main(int argc, char *argv[])
 	  bothleptonsinacc = false;
       }
     }
-    
-    genZpt = vZ.Pt();
-    genZeta = vZ.Eta();
-    genZphi = vZ.Phi();
-    genZm = vZ.M();
+    */
+    //vZ.SetPtEtaPhiM(itree->GetLeaf("ZBoson.PT")->GetValue(0),itree->GetLeaf("ZBoson.Eta")->GetValue(0),itree->GetLeaf("ZBoson.Phi")->GetValue(0),itree->GetLeaf("ZBoson.Mass")->GetValue(0));
+    //cout <<  vZ.Pt() << endl;
+    //cout << itree->GetLeaf("ZBoson.PT")->GetValue(0) << endl;
+    genZpt = itree->GetLeaf("ZBoson.PT")->GetValue(0);
+    genZeta = itree->GetLeaf("ZBoson.Eta")->GetValue(0);
+    genZphi = itree->GetLeaf("ZBoson.Phi")->GetValue(0);
+    genZm = itree->GetLeaf("ZBoson.Mass")->GetValue(0);
     //std::cout << "Dilep mass: " << vZ.M() << std::endl;
     if (bothleptonsinacc)
       genZacc = 1.;
