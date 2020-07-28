@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
   auto comp_pt = [](auto &a, auto &b) { return a.sum_pt() > b.sum_pt(); };
   auto comp_p4 = [](auto &a, auto &b) { return a.pt > b.pt; };
 
-  for (unsigned int k=0; k<100; k++){
+  for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
     
     float npv = itree->GetLeaf("Vertex_size")->GetValue(0);
