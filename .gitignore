@@ -23,3 +23,7 @@ root2pileup
 stdhep2pileup
 tmp
 PapuDelphes
+data/*npz
+data/*root
+data_recoil/*npz
+data_recoil/*root
