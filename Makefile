@@ -220,6 +220,15 @@ tmp/readers/PapuDelphes.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 
+PapuDelphesTrain$(ExeSuf): \
+	tmp/readers/PapuDelphesTrain.$(ObjSuf)
+
+tmp/readers/PapuDelphesTrain.$(ObjSuf): \
+	readers/PapuDelphesTrain.cpp \
+	external/ExRootAnalysis/ExRootProgressBar.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h
+
 ClusterDelphes$(ExeSuf): \
 	tmp/readers/ClusterDelphes.$(ObjSuf)
 
@@ -280,6 +289,7 @@ tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 EXECUTABLE +=  \
 	PapuDelphes$(ExeSuf) \
+	PapuDelphesTrain$(ExeSuf) \
 	ClusterDelphes$(ExeSuf) \
 	DelphesHepMC$(ExeSuf) \
 	DelphesLHEF$(ExeSuf) \
@@ -288,6 +298,7 @@ EXECUTABLE +=  \
 
 EXECUTABLE_OBJ +=  \
 	tmp/readers/PapuDelphes.$(ObjSuf) \
+	tmp/readers/PapuDelphesTrain.$(ObjSuf) \
 	tmp/readers/ClusterDelphes.$(ObjSuf) \
 	tmp/readers/DelphesHepMC.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
