@@ -508,7 +508,8 @@ int main(int argc, char *argv[])
       ++cluster_idx;
     }
     // if there are fewer than NMAX, it'll get padded out with default values
-    //output_particles.resize(NMAX);
+    output_particles.resize(NMAX);
+    output_clusters.resize(NMAX_C);
 
     fill(vpt, output_particles, [](PFCand& p) { return p.pt; }); 
     fill(veta, output_particles, [](PFCand& p) { return p.eta; }); 
