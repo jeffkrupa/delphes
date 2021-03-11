@@ -482,8 +482,6 @@ int main(int argc, char *argv[])
     output_particles.clear();
     int cluster_idx = 0;
 
-    std::cout << sorted_clusters.size() << std::endl;
-
     output_clusters.clear();
 
     for (auto& cluster : sorted_clusters) {
