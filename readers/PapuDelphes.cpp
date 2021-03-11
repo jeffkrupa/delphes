@@ -327,7 +327,8 @@ int main(int argc, char *argv[])
   float recZpt=-99., recZeta=-99., recZphi=-99., recZm=-99.;
   float genjet1pt=-99., genjet1eta=-99., genjet1phi=-99., genjet1e=-99.;
   float genjet2pt=-99., genjet2eta=-99., genjet2phi=-99., genjet2e=-99.;
-  int nclus = 0;
+  int n_clus = 0;
+  int n_pf = 0;
 
 
   tout->Branch("pt", &vpt);
@@ -372,7 +373,8 @@ int main(int argc, char *argv[])
   TBranch* b_genjet2phi = tout->Branch("genjet2phi",&genjet2phi, "genjet2phi/F");
   TBranch* b_genjet2e = tout->Branch("genjet2e",&genjet2e, "genjet2e/F");
 
-  TBranch* b_nclus = tout->Branch("nclus",&nclus, "nclus/I");
+  TBranch* b_nclus = tout->Branch("nclus",&n_clus, "nclus/I");
+  TBranch* b_npf = tout->Branch("npf",&n_pf, "npf/I");
 
   auto ho = HierarchicalOrdering<4, 10>();
   //auto ho = HierarchicalOrdering<4, 20>();
@@ -430,6 +432,7 @@ int main(int argc, char *argv[])
     input_particles.clear();
     unsigned int npfs = pfbranch->GetEntries();
     npfs = itree->GetLeaf("ParticleFlowCandidate_size")->GetValue(0);
+    n_pf = npfs;
     for (unsigned int j=0; j<npfs; j++){
       PFCand tmppf;
       tmppf.npv = npv;
@@ -515,7 +518,7 @@ int main(int argc, char *argv[])
     output_particles.resize(NMAX);
     output_clusters.resize(NMAX_C);
 
-    nclus = sorted_clusters.size();
+    n_clus = sorted_clusters.size();
 
     fill(vpt, output_particles, [](PFCand& p) { return p.pt; }); 
     fill(veta, output_particles, [](PFCand& p) { return p.eta; }); 
