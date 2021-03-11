@@ -211,15 +211,6 @@ EXECUTABLE_OBJ +=  \
 	tmp/examples/Example1.$(ObjSuf) \
 	tmp/validation/DelphesValidation.$(ObjSuf)
 
-SemivisDelphes$(ExeSuf): \
-	tmp/readers/SemivisDelphes.$(ObjSuf)
-
-tmp/readers/SemivisDelphes.$(ObjSuf): \
-	readers/SemivisDelphes.cpp \
-	external/ExRootAnalysis/ExRootProgressBar.h \
-	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
-
 PapuDelphes$(ExeSuf): \
 	tmp/readers/PapuDelphes.$(ObjSuf)
 
@@ -299,7 +290,6 @@ tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 EXECUTABLE +=  \
 	PapuDelphes$(ExeSuf) \
 	PapuDelphesTrain$(ExeSuf) \
-	SemivisDelphes$(ExeSuf) \
 	ClusterDelphes$(ExeSuf) \
 	DelphesHepMC$(ExeSuf) \
 	DelphesLHEF$(ExeSuf) \
@@ -309,7 +299,6 @@ EXECUTABLE +=  \
 EXECUTABLE_OBJ +=  \
 	tmp/readers/PapuDelphes.$(ObjSuf) \
 	tmp/readers/PapuDelphesTrain.$(ObjSuf) \
-	tmp/readers/SemivisDelphes.$(ObjSuf) \
 	tmp/readers/ClusterDelphes.$(ObjSuf) \
 	tmp/readers/DelphesHepMC.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \

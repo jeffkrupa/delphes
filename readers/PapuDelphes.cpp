@@ -27,6 +27,7 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 static int NMAX = 9000;
+static int NMAX_C = 2000;
 
 struct PFCand
 {
@@ -45,7 +46,14 @@ struct PFCand
   float cluster_r = 0;
   float vtxid = -1;
   float npv = 0;
-  float isolep = 0;
+};
+
+struct Clus
+{
+  float idx = -1;
+  float hardch_pt = 0;
+  float puch_pt = 0;
+  float r = 0;
 };
 
 
@@ -253,6 +261,15 @@ fill(vector<float> &vattr, vector<PFCand> &particles, T fn_attr)
     vattr.push_back(fn_attr(p));
 }
 
+template <typename T>
+void 
+fillC(vector<float> &vattr, vector<Clus> &clusters, T fn_attr)
+{
+  vattr.clear();
+  for (auto& c : clusters)
+    vattr.push_back(fn_attr(c));
+}
+
 
 //---------------------------------------------------------------------------
 
@@ -285,20 +302,25 @@ int main(int argc, char *argv[])
   TBranch* genbranch = (TBranch*)itree->GetBranch("PileUpMix");
   TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
   TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
-  TBranch* zbranch = (TBranch*)itree->GetBranch("ZBoson");
-  std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
 
   vector<PFCand> output_particles;
   output_particles.reserve(NMAX);
 
-  vector<float> vpt, veta, vphi, ve, vpuppi, vpdgid, vhardfrac, vcluster_idx, vvtxid, vcluster_r, vcluster_hardch_pt, vcluster_puch_pt, vnpv, visolep;
+  vector<Clus> input_clusters;
+
+  vector<Clus> output_clusters;
+  output_clusters.reserve(NMAX_C);
+
+  vector<float> vpt, veta, vphi, ve, vpuppi, vpdgid, vhardfrac, vcluster_idx, vvtxid, vcluster_r, vcluster_hardch_pt, vcluster_puch_pt, vnpv;
   vpt.reserve(NMAX); veta.reserve(NMAX); vphi.reserve(NMAX); 
   ve.reserve(NMAX); vpuppi.reserve(NMAX); vpdgid.reserve(NMAX); 
   vhardfrac.reserve(NMAX); vcluster_idx.reserve(NMAX); vvtxid.reserve(NMAX);
   vcluster_r.reserve(NMAX); vcluster_hardch_pt.reserve(NMAX); vcluster_puch_pt.reserve(NMAX);
   vnpv.reserve(NMAX);
-  visolep.reserve(NMAX);
+
+  vector<float> v_idx, v_r, v_hardch_pt, v_puch_pt;
+  v_idx.reserve(NMAX); v_r.reserve(NMAX); v_hardch_pt.reserve(NMAX); v_puch_pt.reserve(NMAX);
 
   float genmet=-99., genmetphi=-99., genUmag=-99., genUphi=-99.;
   float genZpt=-99., genZeta=-99., genZphi=-99., genZm=-99., genZacc=-99.;
@@ -319,7 +341,12 @@ int main(int argc, char *argv[])
   tout->Branch("cluster_puch_pt", &vcluster_puch_pt);
   tout->Branch("vtxid", &vvtxid);
   tout->Branch("npv", &vnpv);
-  tout->Branch("isolep", &visolep);
+
+  tout->Branch("c_idx", &v_idx);
+  tout->Branch("c_r", &v_r);
+  tout->Branch("c_hardch_pt", &v_hardch_pt);
+  tout->Branch("c_puch_pt", &v_puch_pt);
+
   
   TBranch* b_genZacc = tout->Branch("genZacc",&genZacc, "genZacc/F");
   TBranch* b_genZpt = tout->Branch("genZpt",&genZpt, "genZpt/F");
@@ -374,127 +401,6 @@ int main(int argc, char *argv[])
     genUmag = vMet.Mod();
     genUphi = vMet.Phi();
 
-    // Z Boson
-
-    TLorentzVector vZ(0,0,0,0);
-    int firstpid = 0;
-    bool bothfound = false;
-    bool bothleptonsinacc = true;    
-
-    /*
-    for (unsigned int j=0; j<ngens; j++){
-      if (bothfound)
-	break;
-      if (firstpid == 0 && itree->GetLeaf("PileUpMix.IsPU")->GetValue(j)==0 && (abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==11 || abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==13)){
-	firstpid = itree->GetLeaf("PileUpMix.PID")->GetValue(j);
-	TLorentzVector tmp; tmp.SetPtEtaPhiE(itree->GetLeaf("PileUpMix.PT")->GetValue(j),itree->GetLeaf("PileUpMix.Eta")->GetValue(j),itree->GetLeaf("PileUpMix.Phi")->GetValue(j),itree->GetLeaf("PileUpMix.E")->GetValue(j));
-	vZ += tmp;
-	if (abs(itree->GetLeaf("PileUpMix.Eta")->GetValue(j))>4.0)
-	  bothleptonsinacc = false;	
-      }
-      if (firstpid == (-1)*itree->GetLeaf("PileUpMix.PID")->GetValue(j) && itree->GetLeaf("PileUpMix.IsPU")->GetValue(j)==0 && (abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==11 || abs(itree->GetLeaf("PileUpMix.PID")->GetValue(j))==13)){
-	TLorentzVector tmp; tmp.SetPtEtaPhiE(itree->GetLeaf("PileUpMix.PT")->GetValue(j),itree->GetLeaf("PileUpMix.Eta")->GetValue(j),itree->GetLeaf("PileUpMix.Phi")->GetValue(j),itree->GetLeaf("PileUpMix.E")->GetValue(j));
-	vZ += tmp;
-	bothfound = true;
-	if (abs(itree->GetLeaf("PileUpMix.Eta")->GetValue(j))>4.0)
-	  bothleptonsinacc = false;
-      }
-    }
-    */
-    //vZ.SetPtEtaPhiM(itree->GetLeaf("ZBoson.PT")->GetValue(0),itree->GetLeaf("ZBoson.Eta")->GetValue(0),itree->GetLeaf("ZBoson.Phi")->GetValue(0),itree->GetLeaf("ZBoson.Mass")->GetValue(0));
-    //cout <<  vZ.Pt() << endl;
-    //cout << itree->GetLeaf("ZBoson.PT")->GetValue(0) << endl;
-    genZpt = itree->GetLeaf("ZBoson.PT")->GetValue(0);
-    genZeta = itree->GetLeaf("ZBoson.Eta")->GetValue(0);
-    genZphi = itree->GetLeaf("ZBoson.Phi")->GetValue(0);
-    genZm = itree->GetLeaf("ZBoson.Mass")->GetValue(0);
-    //std::cout << "Dilep mass: " << vZ.M() << std::endl;
-    if (bothleptonsinacc)
-      genZacc = 1.;
-    else 
-      genZacc = 0.;
-
-
-    TLorentzVector vrecZ(0,0,0,0);
-    int firstrecpid = 0;
-    bool bothrecfound = false;    
-
-    unsigned int nelectron = electronbranch->GetEntries();
-    nelectron = itree->GetLeaf("Electron_size")->GetValue(0);
-    unsigned int nmuon = muonbranch->GetEntries();
-    nmuon = itree->GetLeaf("MuonLoose_size")->GetValue(0);
-
-    std::vector<float> leptonpt;
-    //int leptype = 0;
-
-    /*
-    for (unsigned int j=0; j<nelectron; j++){
-      leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
-    }
-    for (unsigned int j=0; j<nmuon; j++){
-      leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
-    }
-    */
-
-    float maxleppt = -99;
-    bool maxisele = 0;
-    if (nelectron>1){
-      maxleppt = itree->GetLeaf("Electron.PT")->GetValue(0);
-      maxisele = 1;
-    }
-    if (nmuon>1){
-      if (itree->GetLeaf("MuonLoose.PT")->GetValue(0)>maxleppt){
-	maxleppt = itree->GetLeaf("MuonLoose.PT")->GetValue(0);
-	maxisele = 0;
-      }
-    }
-
-    if (maxleppt>0){
-      if (maxisele){
-	for (unsigned int j=0; j<nelectron; j++){
-	  if (bothrecfound)
-	    break;
-	  if (firstrecpid == 0 && itree->GetLeaf("Electron.PT")->GetValue(j)>10){
-	    firstrecpid = itree->GetLeaf("Electron.Charge")->GetValue(j);
-	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("Electron.PT")->GetValue(j),itree->GetLeaf("Electron.Eta")->GetValue(j),itree->GetLeaf("Electron.Phi")->GetValue(j),0.00051099);
-	    vrecZ += tmp;
-	    leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
-	  }
-	  if (firstrecpid == (-1)*itree->GetLeaf("Electron.Charge")->GetValue(j) && itree->GetLeaf("Electron.PT")->GetValue(j)>10){
-	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("Electron.PT")->GetValue(j),itree->GetLeaf("Electron.Eta")->GetValue(j),itree->GetLeaf("Electron.Phi")->GetValue(j),0.00051099);
-	    vrecZ += tmp;
-	    leptonpt.push_back(itree->GetLeaf("Electron.PT")->GetValue(j));
-	    //std::cout << "Dilep rec mass: " << vrecZ.M() << std::endl;
-	    bothrecfound = true;
-	  }
-	}
-      }
-      else{
-	for (unsigned int j=0; j<nmuon; j++){
-	  if (bothrecfound)
-	    break;
-	  if (firstrecpid == 0 && itree->GetLeaf("MuonLoose.PT")->GetValue(j)>10){
-	    firstpid = itree->GetLeaf("MuonLoose.Charge")->GetValue(j);
-	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("MuonLoose.PT")->GetValue(j),itree->GetLeaf("MuonLoose.Eta")->GetValue(j),itree->GetLeaf("MuonLoose.Phi")->GetValue(j),0.1057);
-	    vrecZ += tmp;
-	    leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
-	  }
-	  if (firstrecpid == (-1)*itree->GetLeaf("MuonLoose.Charge")->GetValue(j) && itree->GetLeaf("MuonLoose.PT")->GetValue(j)>10){
-	    TLorentzVector tmp; tmp.SetPtEtaPhiM(itree->GetLeaf("MuonLoose.PT")->GetValue(j),itree->GetLeaf("MuonLoose.Eta")->GetValue(j),itree->GetLeaf("MuonLoose.Phi")->GetValue(j),0.1057);
-	    vrecZ += tmp;
-	    leptonpt.push_back(itree->GetLeaf("MuonLoose.PT")->GetValue(j));
-	    //std::cout << "Dilep rec mass: " << vrecZ.M() << std::endl;
-	    bothrecfound = true;
-	  }
-	}
-      }      
-    }
-
-    recZpt = vrecZ.Pt();
-    recZeta = vrecZ.Eta();
-    recZphi = vrecZ.Phi();
-    recZm = vrecZ.M();
-    
     unsigned int ngenjets = genjetbranch->GetEntries();
     ngenjets = itree->GetLeaf("GenJet_size")->GetValue(0);
 
@@ -540,14 +446,6 @@ int main(int argc, char *argv[])
       }
       else
 	tmppf.vtxid = -1;
-      if ((abs(tmppf.pdgid)==11 || abs(tmppf.pdgid)==13) && tmppf.pt>10){
-	std::vector<float>::iterator it;
-	it = std::find (leptonpt.begin(), leptonpt.end(), tmppf.pt);
-	if (it != leptonpt.end())
-	  tmppf.isolep = 1;  
-	else
-	  tmppf.isolep = 0;  
-      }
       input_particles.push_back(tmppf);
     }
 
@@ -583,7 +481,19 @@ int main(int argc, char *argv[])
 
     output_particles.clear();
     int cluster_idx = 0;
+
+    std::cout << sorted_clusters.size() << std::endl;
+
+    output_clusters.clear();
+
     for (auto& cluster : sorted_clusters) {
+      Clus tmpclus;
+      tmpclus.idx = cluster_idx;
+      tmpclus.hardch_pt = cluster.hardch_pt();
+      tmpclus.puch_pt = cluster.puch_pt();
+      tmpclus.r = cluster.r();
+      output_clusters.push_back(tmpclus);
+
       for (auto* p : cluster) {
         p->cluster_idx = cluster_idx;
 	p->cluster_hardch_pt = cluster.hardch_pt();
@@ -600,7 +510,7 @@ int main(int argc, char *argv[])
       ++cluster_idx;
     }
     // if there are fewer than NMAX, it'll get padded out with default values
-    output_particles.resize(NMAX);
+    //output_particles.resize(NMAX);
 
     fill(vpt, output_particles, [](PFCand& p) { return p.pt; }); 
     fill(veta, output_particles, [](PFCand& p) { return p.eta; }); 
@@ -615,7 +525,13 @@ int main(int argc, char *argv[])
     fill(vcluster_puch_pt, output_particles, [](PFCand& p) { return p.cluster_puch_pt; }); 
     fill(vvtxid, output_particles, [](PFCand& p) { return p.vtxid; }); 
     fill(vnpv, output_particles, [](PFCand& p) { return p.npv; }); 
-    fill(visolep, output_particles, [](PFCand& p) { return p.isolep; }); 
+
+    fillC(v_idx, output_clusters, [](Clus& c) { return c.idx; }); 
+    fillC(v_r, output_clusters, [](Clus& c) { return c.r; }); 
+    fillC(v_hardch_pt, output_clusters, [](Clus& c) { return c.hardch_pt; }); 
+    fillC(v_puch_pt, output_clusters, [](Clus& c) { return c.puch_pt; }); 
+
+
     
     tout->Fill();
 
