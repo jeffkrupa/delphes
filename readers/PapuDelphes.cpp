@@ -327,7 +327,9 @@ int main(int argc, char *argv[])
   float recZpt=-99., recZeta=-99., recZphi=-99., recZm=-99.;
   float genjet1pt=-99., genjet1eta=-99., genjet1phi=-99., genjet1e=-99.;
   float genjet2pt=-99., genjet2eta=-99., genjet2phi=-99., genjet2e=-99.;
-  
+  int nclus = 0;
+
+
   tout->Branch("pt", &vpt);
   tout->Branch("eta", &veta);
   tout->Branch("phi", &vphi);
@@ -369,6 +371,8 @@ int main(int argc, char *argv[])
   TBranch* b_genjet2eta = tout->Branch("genjet2eta",&genjet2eta, "genjet2eta/F");
   TBranch* b_genjet2phi = tout->Branch("genjet2phi",&genjet2phi, "genjet2phi/F");
   TBranch* b_genjet2e = tout->Branch("genjet2e",&genjet2e, "genjet2e/F");
+
+  TBranch* b_nclus = tout->Branch("nclus",&nclus, "nclus/I");
 
   auto ho = HierarchicalOrdering<4, 10>();
   //auto ho = HierarchicalOrdering<4, 20>();
@@ -510,6 +514,8 @@ int main(int argc, char *argv[])
     // if there are fewer than NMAX, it'll get padded out with default values
     output_particles.resize(NMAX);
     output_clusters.resize(NMAX_C);
+
+    nclus = sorted_clusters.size();
 
     fill(vpt, output_particles, [](PFCand& p) { return p.pt; }); 
     fill(veta, output_particles, [](PFCand& p) { return p.eta; }); 
