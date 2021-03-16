@@ -39,7 +39,7 @@ struct PFCand
   float e = 0;
   float puppi = 1;
   float pdgid = 0;
-  float hardfrac = 1;  
+  float hardfrac = -1.;  
   float cluster_idx = -1;
   float cluster_hardch_pt = 0;
   float cluster_puch_pt = 0;
