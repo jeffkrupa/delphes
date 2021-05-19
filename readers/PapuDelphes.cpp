@@ -388,6 +388,11 @@ int main(int argc, char *argv[])
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
     
+    genZpt = itree->GetLeaf("ZBoson.PT")->GetValue(0);
+    genZeta = itree->GetLeaf("ZBoson.Eta")->GetValue(0);
+    genZphi = itree->GetLeaf("ZBoson.Phi")->GetValue(0);
+    genZm = itree->GetLeaf("ZBoson.Mass")->GetValue(0);
+
     float npv = itree->GetLeaf("Vertex_size")->GetValue(0);
     genmet = itree->GetLeaf("GenMissingET.MET")->GetValue(0);
     genmetphi = itree->GetLeaf("GenMissingET.Phi")->GetValue(0);
