@@ -599,6 +599,10 @@ int main(int argc, char *argv[])
       }
       ++cluster_idx;
     }
+
+    // sorting input particles by pT
+    sort(output_particles.begin(), output_particles.end(), comp_p4);    
+
     // if there are fewer than NMAX, it'll get padded out with default values
     output_particles.resize(NMAX);
 
