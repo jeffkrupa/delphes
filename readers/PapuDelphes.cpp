@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
   TBranch* genbranch = (TBranch*)itree->GetBranch("PileUpMix");
   TBranch* electronbranch = (TBranch*)itree->GetBranch("Electron");
   TBranch* muonbranch = (TBranch*)itree->GetBranch("MuonLoose");
-  TBranch* zbranch = (TBranch*)itree->GetBranch("ZBoson");
+  //TBranch* zbranch = (TBranch*)itree->GetBranch("ZBoson");
   std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
 
@@ -404,10 +404,12 @@ int main(int argc, char *argv[])
     //vZ.SetPtEtaPhiM(itree->GetLeaf("ZBoson.PT")->GetValue(0),itree->GetLeaf("ZBoson.Eta")->GetValue(0),itree->GetLeaf("ZBoson.Phi")->GetValue(0),itree->GetLeaf("ZBoson.Mass")->GetValue(0));
     //cout <<  vZ.Pt() << endl;
     //cout << itree->GetLeaf("ZBoson.PT")->GetValue(0) << endl;
-    genZpt = itree->GetLeaf("ZBoson.PT")->GetValue(0);
-    genZeta = itree->GetLeaf("ZBoson.Eta")->GetValue(0);
-    genZphi = itree->GetLeaf("ZBoson.Phi")->GetValue(0);
-    genZm = itree->GetLeaf("ZBoson.Mass")->GetValue(0);
+    
+    //genZpt = itree->GetLeaf("ZBoson.PT")->GetValue(0);
+    //genZeta = itree->GetLeaf("ZBoson.Eta")->GetValue(0);
+    //genZphi = itree->GetLeaf("ZBoson.Phi")->GetValue(0);
+    //genZm = itree->GetLeaf("ZBoson.Mass")->GetValue(0);
+
     //std::cout << "Dilep mass: " << vZ.M() << std::endl;
     if (bothleptonsinacc)
       genZacc = 1.;
@@ -419,10 +421,10 @@ int main(int argc, char *argv[])
     int firstrecpid = 0;
     bool bothrecfound = false;    
 
-    unsigned int nelectron = electronbranch->GetEntries();
-    nelectron = itree->GetLeaf("Electron_size")->GetValue(0);
-    unsigned int nmuon = muonbranch->GetEntries();
-    nmuon = itree->GetLeaf("MuonLoose_size")->GetValue(0);
+    //unsigned int nelectron = electronbranch->GetEntries();
+    //nelectron = itree->GetLeaf("Electron_size")->GetValue(0);
+    //unsigned int nmuon = muonbranch->GetEntries();
+    //nmuon = itree->GetLeaf("MuonLoose_size")->GetValue(0);
 
     std::vector<float> leptonpt;
     //int leptype = 0;
@@ -436,6 +438,8 @@ int main(int argc, char *argv[])
     }
     */
 
+
+    /*
     float maxleppt = -99;
     bool maxisele = 0;
     if (nelectron>1){
@@ -495,6 +499,8 @@ int main(int argc, char *argv[])
     recZphi = vrecZ.Phi();
     recZm = vrecZ.M();
     
+    */
+
     unsigned int ngenjets = genjetbranch->GetEntries();
     ngenjets = itree->GetLeaf("GenJet_size")->GetValue(0);
 
@@ -601,7 +607,7 @@ int main(int argc, char *argv[])
     }
 
     // sorting input particles by pT
-    sort(output_particles.begin(), output_particles.end(), comp_p4);    
+    //sort(output_particles.begin(), output_particles.end(), comp_p4);    
 
     // if there are fewer than NMAX, it'll get padded out with default values
     output_particles.resize(NMAX);
