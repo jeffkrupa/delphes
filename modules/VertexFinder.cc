@@ -99,6 +99,7 @@ void VertexFinder::Process()
   Candidate *candidate;
 
   // Clear the track and cluster maps before starting
+  trackIDToUniqueCandidateID.clear();
   trackIDToDouble.clear();
   trackIDToInt.clear();
   trackIDToBool.clear();
@@ -141,15 +142,6 @@ void VertexFinder::Process()
       trackIDToBool[clusterIDToInt.at(cluster->first).at("seed")]["claimed"] = true;
   }
 
-  // Add tracks to the output array after updating their ClusterIndex.
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
-  {
-    if(candidate->Momentum.Pt() < fMinPT || fabs(candidate->Momentum.Eta()) > fMaxEta)
-      continue;
-    candidate->ClusterIndex = trackIDToInt.at(candidate->GetUniqueID()).at("clusterIndex");
-    fOutputArray->Add(candidate);
-  }
 
   // Add clusters with at least MinNDF tracks to the output array in order of
   // descending sum(pt**2).
@@ -163,10 +155,17 @@ void VertexFinder::Process()
   }
   sort(clusterSumPT2.begin(), clusterSumPT2.end(), secondDescending);
 
+  int nclus = 0;
+  std::map<UInt_t,  std::vector<Int_t> > finalClusterToCandidateDict;
+
   for(vector<pair<UInt_t, Double_t> >::const_iterator cluster = clusterSumPT2.begin(); cluster != clusterSumPT2.end(); cluster++)
   {
+    //std::cout << "### How many clusters for final for loop? " << std::endl;
+    //std::cout << nclus << std::endl;
     DelphesFactory *factory = GetFactory();
     candidate = factory->NewCandidate();
+
+    finalClusterToCandidateDict[nclus] = clusterIDToCandidates.at(cluster->first).at("candidates");
 
     candidate->ClusterIndex = cluster->first;
     candidate->ClusterNDF = clusterIDToInt.at(cluster->first).at("ndf");
@@ -176,7 +175,38 @@ void VertexFinder::Process()
     candidate->PositionError.SetXYZT(0.0, 0.0, clusterIDToDouble.at(cluster->first).at("ez"), 0.0);
 
     fVertexOutputArray->Add(candidate);
+    nclus++;
   }
+
+
+
+
+  // Add tracks to the output array after updating their ClusterIndex.
+  fItInputArray->Reset();
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  {
+    candidate->ClusterIndex = -1;
+    if(candidate->Momentum.Pt() < fMinPT || fabs(candidate->Momentum.Eta()) > fMaxEta){
+      continue;
+    }
+    
+    //candidate->ClusterIndex = trackIDToInt.at(candidate->GetUniqueID()).at("clusterIndex");
+
+    for (auto const& it : finalClusterToCandidateDict){
+      int clusterIDX = it.first;
+      std::vector<Int_t> tmpvec = it.second;
+      if ( std::find(tmpvec.begin(), tmpvec.end(), candidate->GetUniqueID()) != tmpvec.end() ){
+	candidate->ClusterIndex = clusterIDX;
+	//std::cout << "WTF" << std::endl;
+	//std::cout<<clusterIDX<< std::endl;
+	break;
+      }
+    }
+
+    fOutputArray->Add(candidate);
+  }
+
+
 }
 
 //------------------------------------------------------------------------------
@@ -204,6 +234,8 @@ void VertexFinder::createSeeds()
     trackIDToInt[candidate->GetUniqueID()]["clusterIndex"] = -1;
     trackIDToInt[candidate->GetUniqueID()]["interactionIndex"] = candidate->IsPU;
 
+    trackIDToUniqueCandidateID[candidate->GetUniqueID()]["UniqueCandidateID"] = candidate->GetUniqueID();
+
     trackIDToBool[candidate->GetUniqueID()]["claimed"] = false;
 
     trackPT.push_back(make_pair(candidate->GetUniqueID(), candidate->Momentum.Pt()));
@@ -212,6 +244,10 @@ void VertexFinder::createSeeds()
   // Sort tracks by pt and leave only the SeedMinPT highest pt ones in the
   // trackPT vector.
   sort(trackPT.begin(), trackPT.end(), secondDescending);
+  
+  //std::cout << "### Length of trackPT" << std::endl;
+  //std::cout << trackPT.size() << std::endl;
+
   for(vector<pair<UInt_t, Double_t> >::const_iterator track = trackPT.begin(); track != trackPT.end(); track++, maxSeeds++)
   {
     if(track->second < fSeedMinPT)
@@ -303,8 +339,10 @@ void VertexFinder::growCluster(const UInt_t clusterIndex)
     if(nearestDistance < fSigma)
     {
       oldClusterIndex = trackIDToInt.at(nearestID).at("clusterIndex");
-      if(oldClusterIndex >= 0)
+      if(oldClusterIndex >= 0){
         removeTrackFromCluster(nearestID, oldClusterIndex);
+	
+      }
 
       trackIDToBool[nearestID]["claimed"] = true;
       addTrackToCluster(nearestID, clusterIndex);
@@ -321,6 +359,17 @@ Double_t VertexFinder::weight(const UInt_t trackID)
 
 //------------------------------------------------------------------------------
 
+void erase(std::vector<Int_t>& v, int num)
+{
+  size_t j = 0;
+  for (size_t i = 0; i < v.size(); ++i) {
+    if (v[i] != num) v[j++] = v[i];
+  }
+  // trim vector to new size
+  v.resize(j);
+}
+
+
 void VertexFinder::removeTrackFromCluster(const UInt_t trackID, const UInt_t clusterID)
 {
   Double_t wz = weight(trackID);
@@ -328,6 +377,10 @@ void VertexFinder::removeTrackFromCluster(const UInt_t trackID, const UInt_t clu
   trackIDToInt[trackID]["clusterIndex"] = -1;
   clusterIDToInt[clusterID]["ndf"]--;
 
+  //std::cout << "Removing track from cluster" << std::endl;
+  
+  erase(clusterIDToCandidates[clusterID]["candidates"],trackID);
+  
   clusterIDToDouble[clusterID]["sumZ"] -= wz * trackIDToDouble.at(trackID).at("z");
   clusterIDToDouble[clusterID]["errorSumZ"] -= wz * trackIDToDouble.at(trackID).at("ez") * trackIDToDouble.at(trackID).at("ez");
   clusterIDToDouble[clusterID]["sumOfWeightsZ"] -= wz;
@@ -350,10 +403,15 @@ void VertexFinder::addTrackToCluster(const UInt_t trackID, const UInt_t clusterI
     clusterIDToDouble[clusterID]["errorSumZ"] = 0.0;
     clusterIDToDouble[clusterID]["sumOfWeightsZ"] = 0.0;
     clusterIDToDouble[clusterID]["sumPT2"] = 0.0;
+    std::vector<Int_t> vec;
+    clusterIDToCandidates[clusterID]["candidates"] = vec;
+    clusterIDToCandidates[clusterID]["candidates"].clear();
   }
 
   trackIDToInt[trackID]["clusterIndex"] = clusterID;
   clusterIDToInt[clusterID]["ndf"]++;
+
+  clusterIDToCandidates[clusterID]["candidates"].push_back(trackID);
 
   clusterIDToDouble[clusterID]["sumZ"] += wz * trackIDToDouble.at(trackID).at("z");
   clusterIDToDouble[clusterID]["errorSumZ"] += wz * trackIDToDouble.at(trackID).at("ez") * trackIDToDouble.at(trackID).at("ez");

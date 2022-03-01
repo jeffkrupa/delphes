@@ -50,9 +50,11 @@ private:
 
   std::map<UInt_t, std::map<std::string, Double_t> > trackIDToDouble;
   std::map<UInt_t, std::map<std::string, Int_t> > trackIDToInt;
+  std::map<UInt_t, std::map<std::string, Int_t> > trackIDToUniqueCandidateID;
   std::map<UInt_t, std::map<std::string, Bool_t> > trackIDToBool;
 
   std::map<UInt_t, std::map<std::string, Double_t> > clusterIDToDouble;
+  std::map<UInt_t, std::map<std::string, std::vector<Int_t>> > clusterIDToCandidates;
   std::map<UInt_t, std::map<std::string, Int_t> > clusterIDToInt;
   std::map<UInt_t, std::map<std::string, Bool_t> > clusterIDToBool;
   std::vector<std::pair<UInt_t, Double_t> > trackPT;

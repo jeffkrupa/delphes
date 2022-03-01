@@ -139,6 +139,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array, bool verb
     std::cout << "XXXXXX HAS NO GEN PARTICLE " << std::endl;
   }
 
+
   //if(verbose){
     //std::cout << "Cand PT1, PT2, PU, ETA: " << candidate->PT << " " << candidate->Momentum.Pt() << " " << candidate->IsPU << " " << candidate->Momentum.Eta() << std::endl;
     //std::cout << candidate->GetCandidates()->GetEntriesFast() << std::endl;
@@ -304,6 +305,193 @@ std::pair<TLorentzVector, TLorentzVector> TreeWriter::FillParticlesCustom(Candid
 
 //------------------------------------------------------------------------------
 
+TLorentzVector TreeWriter::findGenParticleCustom(Candidate *candidate, TRefArray *array, bool verbose)
+{
+
+  std::vector<TLorentzVector> hard,soft;
+  TLorentzVector hardp4,softp4;
+  hardp4.SetPtEtaPhiE(0,0,0,0);
+  softp4.SetPtEtaPhiE(0,0,0,0);
+
+
+  TLorentzVector maxpart(0,0,0,0);
+  float maxpt=-1;
+
+  bool right_particle = false;
+
+  if (candidate->Momentum.Pt()>1.271759 && candidate->Momentum.Pt()<1.27176){
+    std::cout << "The magic starts" << std::endl;
+    std::cout << candidate->Momentum.E() << std::endl;
+    right_particle = true;
+  }
+
+  if(candidate->GetCandidates()->GetEntriesFast() == 0 && verbose){
+    std::cout << "XXXXXX HAS NO GEN PARTICLE " << std::endl;
+  }
+
+
+
+  //std::cout << "The magic starts" << std::endl;
+  //std::cout << candidate->PID << std::endl;
+
+  //std::cout << " " << std::endl;
+
+  TIter it1(candidate->GetCandidates());
+  it1.Reset();
+  array->Clear();
+  
+  while((candidate = static_cast<Candidate *>(it1.Next())))
+  {
+    TIter it2(candidate->GetCandidates());
+
+    // particle
+    if(candidate->GetCandidates()->GetEntriesFast() == 0)
+    {
+      if (verbose){
+	std::cout << "Particle PU, ID, PT, ETA, PHI, E:    " << candidate->IsPU << " " << candidate->PID << " " << candidate->Momentum.Pt()  << " " <<  candidate->Momentum.Eta() << " " <<  candidate->Momentum.Phi() << " " << candidate->Momentum.E() << std::endl;
+      }
+      array->Add(candidate);
+
+
+
+      //std::cout << "### genpart unique ID " << candidate->GetUniqueID() << std::endl;
+      //std::cout << "### genpart unique vtx ID " << candidate->GenVtxIdx << std::endl;
+      //std::cout << "### genpart unique PT " << candidate->PT << std::endl;
+      
+      TLorentzVector tmp;
+      tmp.SetPtEtaPhiE(candidate->Momentum.Pt(),candidate->Momentum.Eta(),candidate->Momentum.Phi(),candidate->Momentum.E());
+      if (candidate->PT>maxpt){
+	maxpart = tmp;
+	maxpt=candidate->PT;
+      }
+
+      if (candidate->IsPU){
+	if (std::find(soft.begin(), soft.end(), tmp) == soft.end()){	
+	  soft.push_back(tmp);
+	}
+      }
+      else{
+	if (std::find(hard.begin(), hard.end(), tmp) == hard.end()){
+	  hard.push_back(tmp);
+	}
+      }
+
+      continue;
+    }
+
+    // track
+    candidate = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    if(candidate->GetCandidates()->GetEntriesFast() == 0)
+    {
+      if (verbose){
+	std::cout << "Track PU, ID, PT, ETA, PHI, E:    " << candidate->IsPU << " " << candidate->PID  << " " << candidate->Momentum.Pt() << " " << candidate->Momentum.Eta() << " " <<  candidate->Momentum.Phi() << " " << candidate->Momentum.E() << std::endl;
+      }
+      array->Add(candidate);
+
+      /*
+      TLorentzVector tmp;
+      tmp.SetPtEtaPhiE(candidate->Momentum.Pt(),candidate->Momentum.Eta(),candidate->Momentum.Phi(),candidate->Momentum.E());
+
+      if (candidate->PT>maxpt){
+	maxpart = tmp;
+	maxpt=candidate->PT;
+      }
+      
+
+      if (candidate->IsPU){
+	if (std::find(soft.begin(), soft.end(), tmp) == soft.end()){
+	  soft.push_back(tmp);
+	}
+      }
+      else{
+	if (std::find(hard.begin(), hard.end(), tmp) == hard.end()){
+	  hard.push_back(tmp);
+	}
+      }
+      */
+      continue;
+    }
+
+    // tower
+    it2.Reset();
+    maxpt = 0;
+
+    float associated_gen_particles_energy = 0;
+
+    while((candidate = static_cast<Candidate *>(it2.Next())))
+    {
+      if (verbose)
+	std::cout << "Tower PU, ID, PT, ETA, PHI, E:    " << candidate->IsPU << " " << candidate->PID << " " << candidate->Momentum.Pt() << " " <<  candidate->Momentum.Eta() << " " <<  candidate->Momentum.Phi() << " " << candidate->Momentum.E() << std::endl;
+
+      array->Add(candidate->GetCandidates()->At(0));
+
+      
+      Candidate *candidate_tmp = static_cast<Candidate *>(candidate->GetCandidates()->At(0));      
+      TLorentzVector tmp;
+      tmp.SetPtEtaPhiE(candidate_tmp->Momentum.Pt(),candidate_tmp->Momentum.Eta(),candidate_tmp->Momentum.Phi(),candidate_tmp->Momentum.E());
+
+      if (right_particle){
+	std::cout << "Here" << std::endl;
+	std::cout << tmp.E() << std::endl;
+	std::cout << candidate_tmp->GenVtxIdx << std::endl;
+	associated_gen_particles_energy += tmp.E();
+      }
+
+      
+
+      
+      if (candidate_tmp->Momentum.Pt()>maxpt){
+	//std::cout << "Towerrrrs" << std::endl;
+	//std::cout << candidate->PT << std::endl;
+	maxpart = tmp;
+	maxpt=candidate_tmp->Momentum.Pt();
+      }
+      
+      /*
+      if (candidate->IsPU){
+	if (std::find(soft.begin(), soft.end(), tmp) == soft.end()){
+	  soft.push_back(tmp);
+	}
+      }
+      else{
+	if (std::find(hard.begin(), hard.end(), tmp) == hard.end()){	
+	  hard.push_back(tmp);
+	}
+      }
+      */
+      
+    }
+
+    if (right_particle){
+      std::cout << "ASSOCIATED GEN PARTICLES ENERGY" << std::endl;
+      std::cout << associated_gen_particles_energy << std::endl;
+    }
+
+  }
+
+
+  if (verbose){
+    std::cout << " " << std::endl;
+    std::cout << "Now printing hard and soft components" << std::endl;
+  }
+
+  for (unsigned int i = 0; i < hard.size(); i++){
+    hardp4 += hard[i];
+    if (verbose)
+      std::cout << "Hard element Pt Eta Phi E: " << hard[i].Pt() << " " << hard[i].Eta() << " " << hard[i].Phi() << " " << hard[i].E() << " " << std::endl;
+  }
+  for (unsigned int i = 0; i < soft.size(); i++){
+    softp4 += soft[i];
+    if (verbose)
+      std::cout << "Soft element Pt Eta Phi E: " << soft[i].Pt() << " " << soft[i].Eta() << " " << soft[i].Phi() << " " << soft[i].E() << " " << std::endl;
+  }
+  return maxpart;
+}
+
+
+
+//------------------------------------------------------------------------------
+
 void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
 {
   //std::cout << "Calling Particles" << std::endl;
@@ -337,6 +525,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->Status = candidate->Status;
     entry->IsPU = candidate->IsPU;
+    entry->GenVtxIdx = candidate->GenVtxIdx;
 
     entry->M1 = candidate->M1;
     entry->M2 = candidate->M2;
@@ -625,6 +814,10 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
 
     entry->Charge = candidate->Charge;
 
+    //std::cout << "### Charge" << std::endl;
+    //std::cout << entry->Charge << std::endl;
+
+
     entry->PuppiW = candidate->puppiW;
 
     entry->EtaOuter = eta;
@@ -681,7 +874,15 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Z = initialPosition.Z();
     entry->T = initialPosition.T() * 1.0E-3 / c_light;
 
+    //if (candidate->Charge)
     entry->VertexIndex = candidate->ClusterIndex;
+    //else
+
+    TLorentzVector maxpart = findGenParticleCustom(candidate, &entry->Particles);
+    entry->leadingGenPart_PT = maxpart.Pt();
+    entry->leadingGenPart_Eta = maxpart.Eta();
+    entry->leadingGenPart_Phi = maxpart.Phi();
+    entry->leadingGenPart_E = maxpart.E();
 
     entry->Eem = candidate->Eem;
     entry->Ehad = candidate->Ehad;
@@ -696,6 +897,8 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     std::pair<TLorentzVector,TLorentzVector> p4s = FillParticlesCustom(candidate, &entry->Particles, false);
     TLorentzVector hard = p4s.first;
     TLorentzVector soft = p4s.second;
+
+    
 
     //std::cout << " " << std::endl;
     //std::cout << candidate->IsRecoPU << std::endl;

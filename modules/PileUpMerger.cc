@@ -167,6 +167,7 @@ void PileUpMerger::Process()
     candidate->Position.SetT(t - dt0 + dt);
 
     candidate->IsPU = 0;
+    candidate->GenVtxIdx = nvtx;
 
     fParticleOutputArray->Add(candidate);
 
@@ -252,6 +253,9 @@ void PileUpMerger::Process()
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
       candidate->IsPU = 1;
+      candidate->GenVtxIdx = nvtx;
+      
+      //std::cout << nvtx << std::endl;
 
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);

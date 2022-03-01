@@ -51,6 +51,7 @@ public:
 private:
   void FillParticles(Candidate *candidate, TRefArray *array, bool verbose=false);
   std::pair<TLorentzVector,TLorentzVector> FillParticlesCustom(Candidate *candidate, TRefArray *array, bool verbose=false);
+  TLorentzVector findGenParticleCustom(Candidate *candidate, TRefArray *array, bool verbose=false);
 
   void ProcessParticles(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessVertices(ExRootTreeBranch *branch, TObjArray *array);

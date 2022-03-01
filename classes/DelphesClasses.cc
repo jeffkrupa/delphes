@@ -129,7 +129,7 @@ TLorentzVector ParticleFlowCandidate::P4() const
 Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
-  IsPU(0), IsRecoPU(0), IsConstituent(0), IsFromConversion(0),
+  IsPU(0), GenVtxIdx(0), IsRecoPU(0), IsConstituent(0), IsFromConversion(0),
   Flavor(0), FlavorAlgo(0), FlavorPhys(0),
   BTag(0), BTagAlgo(0), BTagPhys(0),
   TauTag(0), TauWeight(0.0), Eem(0.0), Ehad(0.0),
@@ -168,6 +168,7 @@ Candidate::Candidate() :
   NSubJetsPruned(0),
   NSubJetsSoftDropped(0),
   puppiW(1),
+//leadingGenPart_PT(-999),
   ExclYmerge23(0),
   ExclYmerge34(0),
   ExclYmerge45(0),
@@ -274,6 +275,7 @@ void Candidate::Copy(TObject &obj) const
   object.Charge = Charge;
   object.Mass = Mass;
   object.IsPU = IsPU;
+  object.GenVtxIdx = GenVtxIdx;
   object.IsRecoPU = IsRecoPU;
   object.IsConstituent = IsConstituent;
   object.IsFromConversion = IsFromConversion;
@@ -412,6 +414,7 @@ void Candidate::Clear(Option_t *option)
   Charge = 0;
   Mass = 0.0;
   IsPU = 0;
+  GenVtxIdx = 0;
   IsRecoPU = 0;
   IsConstituent = 0;
   IsFromConversion = 0;
@@ -504,6 +507,7 @@ void Candidate::Clear(Option_t *option)
   NSubJetsPruned = 0;
   NSubJetsSoftDropped = 0;
   puppiW = 1;
+  //leadingGenPart_PT = -999;
 
   fArray = 0;
 }

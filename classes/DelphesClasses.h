@@ -129,6 +129,7 @@ public:
 
   Int_t Status; // particle status | hepevt.isthep[number]
   Int_t IsPU; // 0 or 1 for particles from pile-up interactions
+  Int_t GenVtxIdx; // -1 for hard interaction 0...N for gen level pile-up vertices
 
   Int_t M1; // particle 1st mother | hepevt.jmohep[number][0] - 1
   Int_t M2; // particle 2nd mother | hepevt.jmohep[number][1] - 1
@@ -193,6 +194,8 @@ public:
 
   Double_t GenDeltaZ; // distance in z to closest generated vertex
   Double_t BTVSumPT2; // sum pt^2 of tracks attached to the secondary vertex
+
+  //Int_t [5];
 
   TRefArray Constituents; // references to constituents
 
@@ -566,6 +569,11 @@ public:
   Float_t hardfrac; 
   Float_t pufrac;
 
+  Float_t leadingGenPart_PT; 
+  Float_t leadingGenPart_Eta; 
+  Float_t leadingGenPart_Phi; 
+  Float_t leadingGenPart_E; 
+
   Int_t VertexIndex; // reference to vertex
 
   static CompBase *fgCompare; //!
@@ -629,6 +637,7 @@ public:
   Float_t Mass;
 
   Int_t IsPU;
+  Int_t GenVtxIdx; // -1 for hard interaction 0...N for gen level pile-up vertices
   Int_t IsRecoPU;
 
   Int_t IsConstituent;
@@ -721,6 +730,7 @@ public:
   // Puppi weight
 
   Double_t puppiW;
+
 
   // Other Substructure variables
 

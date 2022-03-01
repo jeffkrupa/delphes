@@ -13,7 +13,7 @@
 #######################################
 
 set RandomSeed 142
-set MaxEvents 1000
+set MaxEvents 1
 
 set ExecutionPath {
 
@@ -104,7 +104,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /tmp/PileUp_142.data
+  set PileUpFile /afs/cern.ch/work/b/bmaier/public/upuppi/delphes/PileUp_142.data
 
   # average expected pile up
   set MeanPileUp 140
