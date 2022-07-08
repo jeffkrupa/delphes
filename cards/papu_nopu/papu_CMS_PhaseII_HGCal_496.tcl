@@ -13,7 +13,7 @@
 #######################################
 
 set RandomSeed 496
-set MaxEvents 1000
+set MaxEvents 10000
 
 set ExecutionPath {
 
@@ -104,7 +104,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /tmp/PileUp_496.data
+  set PileUpFile ./PileUp.data
 
   # average expected pile up
   set MeanPileUp 0
@@ -114,6 +114,9 @@ module PileUpMerger PileUpMerger {
 
   # maximum spread in time in s
   set TVertexSpread 800E-12
+
+
+  set PileUpDistribution 2
 
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
   set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
@@ -1089,32 +1092,32 @@ module PidFilter ZFilter {
 module TreeWriter TreeWriter {
 ## add Branch InputArray BranchName BranchClass
 ## add Branch GenParticleFilter/filteredParticles Particle GenParticle
-  add Branch ZFilter/filteredParticles ZBoson GenParticle
+  #add Branch ZFilter/filteredParticles ZBoson GenParticle
 
-  add Branch PileUpMerger/stableParticles PileUpMix GenParticle
-  add Branch PileUpMerger/vertices GenVertex Vertex
+  #add Branch PileUpMerger/stableParticles PileUpMix GenParticle
+  #add Branch PileUpMerger/vertices GenVertex Vertex
 
-  add Branch GenJetFinder/jets GenJet Jet
-  add Branch GenMissingET/momentum GenMissingET MissingET
+  #add Branch GenJetFinder/jets GenJet Jet
+  #add Branch GenMissingET/momentum GenMissingET MissingET
 
 ##  add Branch HCal/eflowTracks EFlowTrack Track
 ##  add Branch ECal/eflowPhotons EFlowPhoton Tower
 ##  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   #add Branch PhotonEfficiency/photons Photon Photon
-  add Branch ElectronEfficiency/electrons Electron Electron
-  add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
+  #add Branch ElectronEfficiency/electrons Electron Electron
+  #add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
   #add Branch MuonTightIdEfficiency/muons MuonTight Muon
 
   #add Branch JetEnergyScale/jets Jet Jet
   #add Branch FatJetFinder/jets FatJet Jet
 
-  add Branch MissingET/momentum MissingET MissingET
-  add Branch PuppiMissingET/momentum PuppiMissingET MissingET
+  #add Branch MissingET/momentum MissingET MissingET
+  #add Branch PuppiMissingET/momentum PuppiMissingET MissingET
   #add Branch GenPileUpMissingET/momentum GenPileUpMissingET MissingET
   add Branch RunPUPPI/PuppiParticles ParticleFlowCandidate ParticleFlowCandidate
 
-  add Branch VertexFinder/vertices Vertex Vertex
+  #add Branch VertexFinder/vertices Vertex Vertex
 
   #add Branch NeutralEFlowMerger/eflowTowers Neutrals ParticleFlowCandidate
   #add Branch HCal/eflowNeutralHadrons NeutralsHads ParticleFlowCandidate
