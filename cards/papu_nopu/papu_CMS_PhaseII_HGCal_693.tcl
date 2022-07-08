@@ -1070,7 +1070,7 @@ module StatusPidFilter GenParticleFilter {
 
     set InputArray  Delphes/allParticles
     set OutputArray filteredParticles
-    set PTMin 5.0
+    set PTMin 0.1
 
 }
 
@@ -1091,10 +1091,11 @@ module PidFilter ZFilter {
 
 module TreeWriter TreeWriter {
 ## add Branch InputArray BranchName BranchClass
-## add Branch GenParticleFilter/filteredParticles Particle GenParticle
   #add Branch ZFilter/filteredParticles ZBoson GenParticle
 
-  add Branch PileUpMerger/stableParticles PileUpMix GenParticle
+
+  add Branch GenParticleFilter/filteredParticles Particle GenParticle
+  #add Branch PileUpMerger/stableParticles PileUpMix GenParticle
   #add Branch PileUpMerger/vertices GenVertex Vertex
 
   #add Branch GenJetFinder/jets GenJet Jet
