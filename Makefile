@@ -229,6 +229,15 @@ tmp/readers/ClusterDelphes.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 
+CLDelphes$(ExeSuf): \
+	tmp/readers/CLDelphes.$(ObjSuf)
+
+tmp/readers/CLDelphes.$(ObjSuf): \
+	readers/CLDelphes.cpp \
+	external/ExRootAnalysis/ExRootProgressBar.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h
+
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)
 
@@ -281,6 +290,7 @@ tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 EXECUTABLE +=  \
 	PapuDelphes$(ExeSuf) \
 	ClusterDelphes$(ExeSuf) \
+	CLDelphes$(ExeSuf) \
 	DelphesHepMC$(ExeSuf) \
 	DelphesLHEF$(ExeSuf) \
 	DelphesROOT$(ExeSuf) \
@@ -289,6 +299,7 @@ EXECUTABLE +=  \
 EXECUTABLE_OBJ +=  \
 	tmp/readers/PapuDelphes.$(ObjSuf) \
 	tmp/readers/ClusterDelphes.$(ObjSuf) \
+	tmp/readers/CLDelphes.$(ObjSuf) \
 	tmp/readers/DelphesHepMC.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
 	tmp/readers/DelphesROOT.$(ObjSuf) \
