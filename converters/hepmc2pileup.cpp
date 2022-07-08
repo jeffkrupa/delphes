@@ -163,6 +163,8 @@ int main(int argc, char *argv[])
 
           factory->Clear();
           reader->Clear();
+	  if (eventCounter > 1000000)
+	    break;
         }
         progressBar.Update(ftello(inputFile), eventCounter);
       }
