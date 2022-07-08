@@ -238,6 +238,20 @@ tmp/readers/CLDelphes.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 
+
+DelphesHepMC3$(ExeSuf): \
+	tmp/readers/DelphesHepMC3.$(ObjSuf)
+
+tmp/readers/DelphesHepMC3.$(ObjSuf): \
+	readers/DelphesHepMC3.cpp \
+        classes/DelphesClasses.h \
+        classes/DelphesFactory.h \
+        classes/DelphesHepMC3Reader.h \
+        modules/Delphes.h \
+        external/ExRootAnalysis/ExRootProgressBar.h \
+        external/ExRootAnalysis/ExRootTreeBranch.h \
+        external/ExRootAnalysis/ExRootTreeWriter.h
+
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)
 
@@ -292,6 +306,7 @@ EXECUTABLE +=  \
 	ClusterDelphes$(ExeSuf) \
 	CLDelphes$(ExeSuf) \
 	DelphesHepMC$(ExeSuf) \
+	DelphesHepMC3$(ExeSuf) \
 	DelphesLHEF$(ExeSuf) \
 	DelphesROOT$(ExeSuf) \
 	DelphesSTDHEP$(ExeSuf)
@@ -301,6 +316,7 @@ EXECUTABLE_OBJ +=  \
 	tmp/readers/ClusterDelphes.$(ObjSuf) \
 	tmp/readers/CLDelphes.$(ObjSuf) \
 	tmp/readers/DelphesHepMC.$(ObjSuf) \
+        tmp/readers/DelphesHepMC3.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
 	tmp/readers/DelphesROOT.$(ObjSuf) \
 	tmp/readers/DelphesSTDHEP.$(ObjSuf)
@@ -553,6 +569,13 @@ tmp/classes/DelphesHepMCReader.$(ObjSuf): \
 	classes/DelphesFactory.h \
 	classes/DelphesStream.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h
+tmp/classes/DelphesHepMC3Reader.$(ObjSuf): \
+        classes/DelphesHepMC3Reader.$(SrcSuf) \
+	classes/DelphesHepMC3Reader.h \
+        classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+        classes/DelphesStream.h \
+        external/ExRootAnalysis/ExRootTreeBranch.h
 tmp/classes/DelphesLHEFReader.$(ObjSuf): \
 	classes/DelphesLHEFReader.$(SrcSuf) \
 	classes/DelphesLHEFReader.h \
@@ -1164,6 +1187,7 @@ DELPHES_OBJ +=  \
 	tmp/classes/DelphesFactory.$(ObjSuf) \
 	tmp/classes/DelphesFormula.$(ObjSuf) \
 	tmp/classes/DelphesHepMCReader.$(ObjSuf) \
+	tmp/classes/DelphesHepMC3Reader.$(ObjSuf) \
 	tmp/classes/DelphesLHEFReader.$(ObjSuf) \
 	tmp/classes/DelphesModule.$(ObjSuf) \
 	tmp/classes/DelphesPileUpReader.$(ObjSuf) \
