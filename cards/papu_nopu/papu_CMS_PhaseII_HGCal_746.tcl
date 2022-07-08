@@ -1094,7 +1094,7 @@ module TreeWriter TreeWriter {
 ## add Branch GenParticleFilter/filteredParticles Particle GenParticle
   #add Branch ZFilter/filteredParticles ZBoson GenParticle
 
-  #add Branch PileUpMerger/stableParticles PileUpMix GenParticle
+  add Branch PileUpMerger/stableParticles PileUpMix GenParticle
   #add Branch PileUpMerger/vertices GenVertex Vertex
 
   #add Branch GenJetFinder/jets GenJet Jet
