@@ -92,10 +92,8 @@ int main(int argc, char *argv[])
   unsigned int nevt = itree->GetEntries();
   TBranch* partbranch = (TBranch*)itree->GetBranch("Particle");
   TBranch* pfbranch = (TBranch*)itree->GetBranch("ParticleFlowCandidate");
-  TBranch* genjetbranch = (TBranch*)itree->GetBranch("GenJet");
   std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
-
   vector<PFCand> output_particles;
   output_particles.reserve(NMAX);
 
@@ -106,10 +104,24 @@ int main(int argc, char *argv[])
   vd0.reserve(NMAX);
   vdz.reserve(NMAX);
 
-  float genjetpt=-99., genjeteta=-99., genjetphi=-99., genjetm=-99.;
-  float puppijetpt=-99., puppijeteta=-99., puppijetphi=-99., puppijetm=-99.;
-  float truthjetpt=-99., truthjeteta=-99., truthjetphi=-99., truthjetm=-99.;
-  float pfjetpt=-99., pfjeteta=-99., pfjetphi=-99., pfjetm=-99.;
+  float jettype=-1.; // 0: gluon, 1: light quark, 2: charm, 3: b, 4: Higgs, 5: Z, 6: top
+  float parton_pt = 0.;
+  float parton_eta = 0.;
+  float parton_phi = 0.;
+  float parton_e = 0.;
+  float jet_pt = 0.;
+  float jet_eta = 0.;
+  float jet_phi = 0.;
+  float jet_e = 0.;
+  TBranch* b_jettype = tout->Branch("jettype",&jettype, "jettype/F");
+  TBranch* b_parton_pt = tout->Branch("parton_pt",&parton_pt, "parton_pt/F");
+  TBranch* b_parton_eta = tout->Branch("parton_eta",&parton_eta, "parton_eta/F");
+  TBranch* b_parton_phi = tout->Branch("parton_phi",&parton_phi, "parton_phi/F");
+  TBranch* b_parton_e = tout->Branch("parton_e",&parton_e, "parton_e/F");
+  TBranch* b_jet_pt = tout->Branch("jet_pt",&jet_pt, "jet_pt/F");
+  TBranch* b_jet_eta = tout->Branch("jet_eta",&jet_eta, "jet_eta/F");
+  TBranch* b_jet_phi = tout->Branch("jet_phi",&jet_phi, "jet_phi/F");
+  TBranch* b_jet_e = tout->Branch("jet_e",&jet_e, "jet_e/F");
 
   // jet branches
   // PF cand branches
@@ -154,7 +166,7 @@ int main(int argc, char *argv[])
       tmppf.pdgid = itree->GetLeaf("ParticleFlowCandidate.PID")->GetValue(j);
       tmppf.charge = itree->GetLeaf("ParticleFlowCandidate.Charge")->GetValue(j);
       tmppf.d0 = 0.;
-      if (abs(itree->GetLeaf("ParticleFlowCandidate.D0")->GetValue(j) > 1e-5)){
+      if (abs(itree->GetLeaf("ParticleFlowCandidate.D0")->GetValue(j) > 1e-6)){
 	tmppf.d0 = itree->GetLeaf("ParticleFlowCandidate.D0")->GetValue(j);
       }	
       else{
@@ -184,27 +196,111 @@ int main(int argc, char *argv[])
     fastjet::ClusterSequence seq(sorted_by_pt(finalStates), *jetDef);
 
     float minpt = 400;
+    float maxeta = 2.5;
     vector<fastjet::PseudoJet> allJets(sorted_by_pt(seq.inclusive_jets(minpt)));
 
     bool has_match = false;
 
-    /*
-
     for (auto& jet : allJets) {
-      if (jet.perp() < minpt)
+      if (jet.perp() < minpt || abs(jet.eta()) > maxeta )
 	break;
+
+      jettype = -1.;
+      parton_pt = 0.;
+      parton_eta = 0.;
+      parton_phi = 0.;
+      parton_e = 0.;
 
       TLorentzVector tmp;
       tmp.SetPtEtaPhiM(jet.perp(),jet.eta(),jet.phi(),jet.m());
-      if ((tmp.DeltaR(Higgs)<0.8) && (tmp.DeltaR(b1)<0.8) && (tmp.DeltaR(b2)<0.8)){
-	has_match = true;
+
+      unsigned int nparts = partbranch->GetEntries();
+      nparts = itree->GetLeaf("Particle_size")->GetValue(0);
+
+      bool has_higgs = false;
+      TLorentzVector higgs(0.,0.,0.,0);
+      for (unsigned int w=0; w<nparts; w++){
+	cout << itree->GetLeaf("Particle.PID")->GetValue(w) << endl;
+	
+	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 25){
+	  has_higgs = true;
+	  higgs.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),125);
+	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
+	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
+	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
+	  parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
+	  break;
+	}
+      }
+
+      if (has_higgs){	
+	TLorentzVector b1(0.,0.,0.,0);
+	TLorentzVector b2(0.,0.,0.,0);
+
+	for (unsigned int w=0; w<nparts; w++){
+	  if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 5){
+	    if (b1.E() == 0)
+	      b1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
+	    else
+	      b2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
+	  }
+	}
+
+	if ((tmp.DeltaR(higgs)<0.8) && (tmp.DeltaR(b1)<0.8) && (tmp.DeltaR(b2)<0.8)) {
+	  cout << "Yay" << endl;
+	  jettype = 4.;
+	}
+      }
+      else{
+	TLorentzVector p1(0.,0.,0.,0);
+	TLorentzVector p2(0.,0.,0.,0);
+	p1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(0),itree->GetLeaf("Particle.Eta")->GetValue(0),itree->GetLeaf("Particle.Phi")->GetValue(0),itree->GetLeaf("Particle.E")->GetValue(0));
+	p2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(1),itree->GetLeaf("Particle.Eta")->GetValue(1),itree->GetLeaf("Particle.Phi")->GetValue(1),itree->GetLeaf("Particle.E")->GetValue(1));
+	
+	if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)>0.8)){
+	  if (itree->GetLeaf("Particle.PID")->GetValue(0) == 21)
+	    jettype = 0.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(0)) <= 3)
+	    jettype = 1.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(0)) == 4)
+	    jettype = 2.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(0)) == 5)
+	    jettype = 3.;
+	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(0);
+	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(0);
+	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(0);
+	  parton_e = itree->GetLeaf("Particle.E")->GetValue(0);
+	}
+	else if ((tmp.DeltaR(p1)>0.8) && (tmp.DeltaR(p2)<0.8)){
+	  if (itree->GetLeaf("Particle.PID")->GetValue(1) == 21)
+	    jettype = 0.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(1)) <= 3)
+	    jettype = 1.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 4)
+	    jettype = 2.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 5)
+	    jettype = 3.;
+	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(1);
+	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(1);
+	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(1);
+	  parton_e = itree->GetLeaf("Particle.E")->GetValue(1);
+	}
+      }
+      
+      if (jettype>-1.){
+
+	jet_pt = tmp.Pt();
+	jet_eta = tmp.Eta();
+	jet_phi = tmp.Phi();
+	jet_e = tmp.E();
+
+	tout->Fill();
 
       }
+
     }
 
-    */
-
-    tout->Fill();
+    //tout->Fill();
 
     progressBar.Update(k, k);
 
