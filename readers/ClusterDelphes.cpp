@@ -46,7 +46,7 @@ using namespace std;
 using namespace fastjet;
 using namespace fastjet::contrib;
 
-static int NMAX = 1000;
+static int NMAX = 300;
 
 //---------------------------------------------------------------------------
 

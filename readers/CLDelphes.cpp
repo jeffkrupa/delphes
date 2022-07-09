@@ -46,7 +46,7 @@ using namespace std;
 using namespace fastjet;
 using namespace fastjet::contrib;
 
-static int NMAX = 1000;
+static int NMAX = 200;
 
 //---------------------------------------------------------------------------
 
@@ -64,6 +64,14 @@ struct PFCand
 };
 
 
+template <typename T>
+void
+fill(vector<float> &vattr, vector<PFCand> &particles, T fn_attr)
+{
+  vattr.clear();
+  for (auto& p : particles)
+    vattr.push_back(fn_attr(p));
+}
 
 //---------------------------------------------------------------------------
 
@@ -205,6 +213,8 @@ int main(int argc, char *argv[])
       if (jet.perp() < minpt || abs(jet.eta()) > maxeta )
 	break;
 
+      output_particles.clear();
+
       jettype = -1.;
       parton_pt = 0.;
       parton_eta = 0.;
@@ -293,6 +303,26 @@ int main(int argc, char *argv[])
 	jet_eta = tmp.Eta();
 	jet_phi = tmp.Phi();
 	jet_e = tmp.E();
+
+	// fill constituents
+	
+	for (auto &c: sorted_by_pt(jet.constituents())){
+	  cout << c.perp() << endl;
+	  cout << c.user_index() << endl;
+	  output_particles.push_back(input_particles.at(c.user_index()));
+
+	}
+
+	output_particles.resize(NMAX);
+	
+	fill(vpt, output_particles, [](PFCand& p) { return p.pt; });
+	fill(veta, output_particles, [](PFCand& p) { return p.eta; });
+	fill(vphi, output_particles, [](PFCand& p) { return p.phi; });
+	fill(ve, output_particles, [](PFCand& p) { return p.e; });
+	fill(vpdgid, output_particles, [](PFCand& p) { return p.pdgid; });
+	fill(vcharge, output_particles, [](PFCand& p) { return p.charge; });
+	fill(vd0, output_particles, [](PFCand& p) { return p.d0; });
+	fill(vdz, output_particles, [](PFCand& p) { return p.dz; });
 
 	tout->Fill();
 
