@@ -230,7 +230,6 @@ int main(int argc, char *argv[])
       bool has_higgs = false;
       TLorentzVector higgs(0.,0.,0.,0);
       for (unsigned int w=0; w<nparts; w++){
-	cout << itree->GetLeaf("Particle.PID")->GetValue(w) << endl;
 	
 	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 25){
 	  has_higgs = true;
@@ -257,7 +256,6 @@ int main(int argc, char *argv[])
 	}
 
 	if ((tmp.DeltaR(higgs)<0.8) && (tmp.DeltaR(b1)<0.8) && (tmp.DeltaR(b2)<0.8)) {
-	  cout << "Yay" << endl;
 	  jettype = 4.;
 	}
       }
@@ -307,8 +305,6 @@ int main(int argc, char *argv[])
 	// fill constituents
 	
 	for (auto &c: sorted_by_pt(jet.constituents())){
-	  cout << c.perp() << endl;
-	  cout << c.user_index() << endl;
 	  output_particles.push_back(input_particles.at(c.user_index()));
 
 	}
