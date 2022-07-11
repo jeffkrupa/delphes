@@ -307,6 +307,8 @@ int main(int argc, char *argv[])
 	jet_e = tmp.E();
 	jet_msd = sdJet.m();
 
+	cout << "Before/after softdrop: " << jet.constituents().size() << " / " << sdJet.constituents().size() << endl;
+
 	// fill constituents
 	
 	for (auto &c: sorted_by_pt(jet.constituents())){
