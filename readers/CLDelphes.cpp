@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
   float jet_eta = 0.;
   float jet_phi = 0.;
   float jet_e = 0.;
+  float jet_msd = 0.;
   TBranch* b_jettype = tout->Branch("jettype",&jettype, "jettype/F");
   TBranch* b_parton_pt = tout->Branch("parton_pt",&parton_pt, "parton_pt/F");
   TBranch* b_parton_eta = tout->Branch("parton_eta",&parton_eta, "parton_eta/F");
@@ -130,6 +131,7 @@ int main(int argc, char *argv[])
   TBranch* b_jet_eta = tout->Branch("jet_eta",&jet_eta, "jet_eta/F");
   TBranch* b_jet_phi = tout->Branch("jet_phi",&jet_phi, "jet_phi/F");
   TBranch* b_jet_e = tout->Branch("jet_e",&jet_e, "jet_e/F");
+  TBranch* b_jet_msd = tout->Branch("jet_msd",&jet_msd, "jet_msd/F");
 
   // jet branches
   // PF cand branches
@@ -297,16 +299,18 @@ int main(int argc, char *argv[])
       
       if (jettype>-1.){
 
+	fastjet::PseudoJet sdJet = (softDrop)(jet);
+
 	jet_pt = tmp.Pt();
 	jet_eta = tmp.Eta();
 	jet_phi = tmp.Phi();
 	jet_e = tmp.E();
+	jet_msd = sdJet.m();
 
 	// fill constituents
 	
 	for (auto &c: sorted_by_pt(jet.constituents())){
 	  output_particles.push_back(input_particles.at(c.user_index()));
-
 	}
 
 	output_particles.resize(NMAX);
