@@ -50,6 +50,8 @@ private:
 
   Bool_t fRequireNotPileup; //!
 
+  Bool_t fCountBs; //!
+
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

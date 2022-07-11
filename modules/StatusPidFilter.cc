@@ -141,6 +141,17 @@ bool isWDaughter(int M1, const TObjArray *fInputArray)
   return false;
 }
 
+bool hasBDaughter(int D, const TObjArray *fInputArray)
+{
+  if(D < 0) return false;
+
+  Candidate *daughter;
+  daughter = static_cast<Candidate *>(fInputArray->At(D));
+  if(hasBottom(daughter->PID)) return true;
+
+  return false;
+}
+
 } // namespace
 
 //------------------------------------------------------------------------------
@@ -162,6 +173,9 @@ void StatusPidFilter::Init()
 {
   // PT threshold
   fPTMin = GetDouble("PTMin", 0.5);
+
+  // count Bs
+  fCountBs = GetBool("CountBs", false);
 
   // keep or remove pileup particles
   fRequireNotPileup = GetBool("RequireNotPileup", false);
@@ -199,12 +213,25 @@ void StatusPidFilter::Process()
     pass = kFALSE;
 
     // hard scattering particles (first condition for Py6, second for Py8)
-    if(status > 20 && status < 30) pass = kTRUE;
+    if(!fCountBs){
+      if(status > 20 && status < 30) pass = kTRUE;
 
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
-    if(!pass || (candidate->Momentum.Pt() < fPTMin)) continue;
+      if(!pass || (candidate->Momentum.Pt() < fPTMin)) continue;
 
-    fOutputArray->Add(candidate);
+      fOutputArray->Add(candidate);
+
+    }
+    else{
+      if(hasBottom(candidate->PID)){
+
+	if(!hasBDaughter(candidate->D1,fInputArray) && !hasBDaughter(candidate->D2,fInputArray)){
+	  pass = kTRUE;
+	}
+	if(!pass || (candidate->Momentum.Pt() < fPTMin)) continue;
+	fOutputArray->Add(candidate);
+      }
+    }
   }
 }

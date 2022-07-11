@@ -85,6 +85,7 @@ set ExecutionPath {
   TauTagging
 
   GenParticleFilter
+  HeavyMesonFilter
 
   ZFilter
 
@@ -1074,6 +1075,16 @@ module StatusPidFilter GenParticleFilter {
 
 }
 
+module StatusPidFilter HeavyMesonFilter {
+
+    set InputArray  Delphes/allParticles
+    set OutputArray filteredParticles
+    set PTMin 0.1
+    set CountBs true
+
+}
+
+
 module PidFilter ZFilter {
 
     set InputArray  Delphes/allParticles
@@ -1095,6 +1106,7 @@ module TreeWriter TreeWriter {
 
 
   add Branch GenParticleFilter/filteredParticles Particle GenParticle
+  add Branch GenParticleFilter/filteredParticles HeavyMesons GenParticle
   #add Branch PileUpMerger/stableParticles PileUpMix GenParticle
   #add Branch PileUpMerger/vertices GenVertex Vertex
 
