@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
 	jet_e = tmp.E();
 	jet_msd = sdJet.m();
 
-	cout << N2fj(jet) << endl;
+	//cout << N2fj(jet) << endl;
 
 	jet_n2 = N2fj(jet);
 	//cout << "Before/after softdrop: " << jet.constituents().size() << " / " << sdJet.constituents().size() << endl;
