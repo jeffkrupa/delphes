@@ -26,6 +26,7 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/Selector.hh"
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"
+//#include "fastjet/EnergyCorrelator.hh"
 
 #include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
 #include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
@@ -35,6 +36,7 @@
 #include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
 #include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
+#include "fastjet/contribs/EnergyCorrelator/EnergyCorrelator.hh"
 
 #include "fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh"
 
@@ -122,6 +124,7 @@ int main(int argc, char *argv[])
   float jet_phi = 0.;
   float jet_e = 0.;
   float jet_msd = 0.;
+  float jet_n2 = -99.;
   TBranch* b_jettype = tout->Branch("jettype",&jettype, "jettype/F");
   TBranch* b_parton_pt = tout->Branch("parton_pt",&parton_pt, "parton_pt/F");
   TBranch* b_parton_eta = tout->Branch("parton_eta",&parton_eta, "parton_eta/F");
@@ -132,6 +135,7 @@ int main(int argc, char *argv[])
   TBranch* b_jet_phi = tout->Branch("jet_phi",&jet_phi, "jet_phi/F");
   TBranch* b_jet_e = tout->Branch("jet_e",&jet_e, "jet_e/F");
   TBranch* b_jet_msd = tout->Branch("jet_msd",&jet_msd, "jet_msd/F");
+  TBranch* b_jet_n2 = tout->Branch("jet_n2",&jet_n2, "jet_n2/F");
 
   // jet branches
   // PF cand branches
@@ -156,6 +160,7 @@ int main(int argc, char *argv[])
   double sdBeta = 0.;
   
   fastjet::contrib::SoftDrop softDrop = fastjet::contrib::SoftDrop(sdBeta,sdZcut,radius);
+  EnergyCorrelatorNseries N2fj(2,1.0,EnergyCorrelator::pt_R);
 
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
@@ -216,6 +221,7 @@ int main(int argc, char *argv[])
 	break;
 
       output_particles.clear();
+
 
       jettype = -1.;
       parton_pt = 0.;
@@ -311,6 +317,9 @@ int main(int argc, char *argv[])
 	jet_e = tmp.E();
 	jet_msd = sdJet.m();
 
+	cout << N2fj(jet) << endl;
+
+	jet_n2 = N2fj(jet);
 	//cout << "Before/after softdrop: " << jet.constituents().size() << " / " << sdJet.constituents().size() << endl;
 
 	// fill constituents
