@@ -248,12 +248,16 @@ int main(int argc, char *argv[])
 	TLorentzVector b1(0.,0.,0.,0);
 	TLorentzVector b2(0.,0.,0.,0);
 
+	int bsfound = 0;
 	for (unsigned int w=0; w<nparts; w++){
 	  if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 5){
+	    bsfound += 1;
 	    if (b1.E() == 0)
 	      b1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
 	    else
 	      b2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
+	    if (bsfound == 2)
+	      break;
 	  }
 	}
 

@@ -214,7 +214,8 @@ void StatusPidFilter::Process()
 
     // hard scattering particles (first condition for Py6, second for Py8)
     if(!fCountBs){
-      if(status > 20 && status < 30) pass = kTRUE;
+      pass = kTRUE;
+      //if(status > 20 && status < 30) pass = kTRUE;
 
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
@@ -223,7 +224,7 @@ void StatusPidFilter::Process()
       fOutputArray->Add(candidate);
 
     }
-    else{
+    /*else{
       if(hasBottom(candidate->PID)){
 
 	if(!hasBDaughter(candidate->D1,fInputArray) && !hasBDaughter(candidate->D2,fInputArray)){
@@ -232,6 +233,6 @@ void StatusPidFilter::Process()
 	if(!pass || (candidate->Momentum.Pt() < fPTMin)) continue;
 	fOutputArray->Add(candidate);
       }
-    }
+      }*/
   }
 }
