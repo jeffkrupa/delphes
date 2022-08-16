@@ -175,6 +175,7 @@ int main(int argc, char *argv[])
     for (unsigned int j=0; j<npfs; j++){
       PFCand tmppf;
       tmppf.pt = itree->GetLeaf("ParticleFlowCandidate.PT")->GetValue(j);
+      if (tmppf.pt < 1.0) { continue; }
       tmppf.eta = itree->GetLeaf("ParticleFlowCandidate.Eta")->GetValue(j);
       tmppf.phi = itree->GetLeaf("ParticleFlowCandidate.Phi")->GetValue(j);
       tmppf.e = itree->GetLeaf("ParticleFlowCandidate.E")->GetValue(j);
