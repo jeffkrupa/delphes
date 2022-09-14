@@ -251,6 +251,12 @@ int main(int argc, char *argv[])
 	  parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
 	  break;
 	}
+        else if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 4){
+          std::cout << "\thas c quark" << std::endl;
+        }
+        else if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 5){
+          std::cout << "\thas b quark" << std::endl;
+        }
       }
 
       if (has_higgs){	
