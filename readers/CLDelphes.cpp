@@ -164,7 +164,9 @@ int main(int argc, char *argv[])
 
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
+    std::cout << "event :" << k << std::endl;
 
+    if (k>100) break;
     if (k%100==0)
       std::cout << k << " / " << nevt << std::endl;
 
@@ -306,8 +308,12 @@ int main(int argc, char *argv[])
 	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(1);
 	  parton_e = itree->GetLeaf("Particle.E")->GetValue(1);
 	}
+        else{
+          std::cout << "\tdeltaR(jet,p1)=" << tmp.DeltaR(p1) << ", " << "deltaR(jet,p2)=" << tmp.DeltaR(p2) << std::endl;
+          std::cout << "\tp1 pdgId=" << abs(itree->GetLeaf("Particle.PID")->GetValue(0)) << ", " << "\tp2 pdgI=" <<abs(itree->GetLeaf("Particle.PID")->GetValue(1)) << std::endl;  
+        }
       }
-      
+      std::cout << "\tjettype" << std::endl;
       if (jettype>-1.){
 
 	fastjet::PseudoJet sdJet = (softDrop)(jet);
