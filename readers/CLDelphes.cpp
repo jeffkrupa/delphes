@@ -252,18 +252,18 @@ int main(int argc, char *argv[])
 	  break;
 	}
         else if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 4){
-          std::cout << "\tpdgid=" << itree->GetLeaf("Particle.PID")->GetValue(w) <<
+          std::cout << "\tc quark at position " << w <<
               "\n\tpt=" << itree->GetLeaf("Particle.PT")->GetValue(w) <<
-              "\n\teta=" << itree->GetLeaf("Particle.Eta")->GetValue(w) <<
-              "\n\tphi=" << itree->GetLeaf("Particle.Phi")->GetValue(w) <<
-              "\n\tE=" << itree->GetLeaf("Particle.E")->GetValue(w) <<  std::endl;
+              "\teta=" << itree->GetLeaf("Particle.Eta")->GetValue(w) <<
+              "\tphi=" << itree->GetLeaf("Particle.Phi")->GetValue(w) <<
+              "\tE=" << itree->GetLeaf("Particle.E")->GetValue(w) <<  std::endl;
         }
         else if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 5){
-          std::cout << "\tpdgid=" << itree->GetLeaf("Particle.PID")->GetValue(w) <<
+          std::cout << "\tb quark at position " << w <<
               "\n\tpt=" << itree->GetLeaf("Particle.PT")->GetValue(w) <<
-              "\n\teta=" << itree->GetLeaf("Particle.Eta")->GetValue(w) <<
-              "\n\tphi=" << itree->GetLeaf("Particle.Phi")->GetValue(w) <<
-              "\n\tE=" << itree->GetLeaf("Particle.E")->GetValue(w) <<  std::endl;
+              "\teta=" << itree->GetLeaf("Particle.Eta")->GetValue(w) <<
+              "\tphi=" << itree->GetLeaf("Particle.Phi")->GetValue(w) <<
+              "\tE=" << itree->GetLeaf("Particle.E")->GetValue(w) <<  std::endl;
         }
       }
 
