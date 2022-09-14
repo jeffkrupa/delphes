@@ -293,6 +293,7 @@ int main(int argc, char *argv[])
 	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(0);
 	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(0);
 	  parton_e = itree->GetLeaf("Particle.E")->GetValue(0);
+          std::cout << "\tp1 only in jet." << std::endl; 
 	}
 	else if ((tmp.DeltaR(p1)>0.8) && (tmp.DeltaR(p2)<0.8)){
 	  if (itree->GetLeaf("Particle.PID")->GetValue(1) == 21)
@@ -307,13 +308,14 @@ int main(int argc, char *argv[])
 	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(1);
 	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(1);
 	  parton_e = itree->GetLeaf("Particle.E")->GetValue(1);
+          std::cout << "\tp2 only in jet." << std::endl; 
 	}
-        else{
-          std::cout << "\tdeltaR(jet,p1)=" << tmp.DeltaR(p1) << ", " << "deltaR(jet,p2)=" << tmp.DeltaR(p2) << std::endl;
-          std::cout << "\tp1 pdgId=" << abs(itree->GetLeaf("Particle.PID")->GetValue(0)) << ", " << "\tp2 pdgI=" <<abs(itree->GetLeaf("Particle.PID")->GetValue(1)) << std::endl;  
+        else{ std::cout <<"\t neither in jet" << std::endl;
         }
+        std::cout << "\t\tdeltaR(jet,p1)=" << tmp.DeltaR(p1) << ", " << "deltaR(jet,p2)=" << tmp.DeltaR(p2) << std::endl;
+        std::cout << "\t\tp1 pdgId=" << abs(itree->GetLeaf("Particle.PID")->GetValue(0)) << ", " << "\tp2 pdgI=" <<abs(itree->GetLeaf("Particle.PID")->GetValue(1)) << std::endl;  
       }
-      std::cout << "\tjettype" << std::endl;
+      std::cout << "\tjettype" << jettype << std::endl;
       if (jettype>-1.){
 
 	fastjet::PseudoJet sdJet = (softDrop)(jet);
