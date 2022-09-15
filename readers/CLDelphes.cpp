@@ -241,7 +241,22 @@ int main(int argc, char *argv[])
       bool has_higgs = false;
       TLorentzVector higgs(0.,0.,0.,0);
       for (unsigned int w=0; w<nparts; w++){
-	
+        if (w==0) {
+          std::cout << "\tparticle 0 " << w <<
+              "\n\tpdgId=" << itree->GetLeaf("Particle.PID")->GetValue(w) <<
+              "\npt=" << itree->GetLeaf("Particle.PT")->GetValue(w) <<
+              "\teta=" << itree->GetLeaf("Particle.Eta")->GetValue(w) <<
+              "\tphi=" << itree->GetLeaf("Particle.Phi")->GetValue(w) <<
+              "\tE=" << itree->GetLeaf("Particle.E")->GetValue(w) <<  std::endl;
+ 	}	
+        if (w==1) {
+          std::cout << "\tparticle 1 " << w <<
+              "\n\tpdgId=" << itree->GetLeaf("Particle.PID")->GetValue(w) <<
+              "\npt=" << itree->GetLeaf("Particle.PT")->GetValue(w) <<
+              "\teta=" << itree->GetLeaf("Particle.Eta")->GetValue(w) <<
+              "\tphi=" << itree->GetLeaf("Particle.Phi")->GetValue(w) <<
+              "\tE=" << itree->GetLeaf("Particle.E")->GetValue(w) <<  std::endl;
+ 	}	
 	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 25){
 	  has_higgs = true;
 	  higgs.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),125);
