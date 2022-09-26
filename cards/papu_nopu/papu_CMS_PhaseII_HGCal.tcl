@@ -12,7 +12,7 @@
 # Order of execution of various modules
 #######################################
 
-set RandomSeed XXX
+set RandomSeed 123
 set MaxEvents 10000
 
 set ExecutionPath {
