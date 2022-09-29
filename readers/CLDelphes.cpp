@@ -8,7 +8,7 @@
 #include <time.h>
 #include <math.h>
 #include <numeric>
-
+#include <fstream>
 #include "TROOT.h"
 
 #include "TFile.h"
@@ -162,6 +162,9 @@ int main(int argc, char *argv[])
   fastjet::contrib::SoftDrop softDrop = fastjet::contrib::SoftDrop(sdBeta,sdZcut,radius);
   EnergyCorrelatorNseries N2fj(2,1.0,EnergyCorrelator::pt_R);
 
+  std::ofstream outfile;
+  outfile.open("../../jettype.txt", std::ios_base::trunc);
+
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
 
@@ -306,9 +309,25 @@ int main(int argc, char *argv[])
 	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(1);
 	  parton_e = itree->GetLeaf("Particle.E")->GetValue(1);
 	}
+	else if ((tmp.DeltaR(p1)>0.8) && (tmp.DeltaR(p2)<0.8)){
+	  if (itree->GetLeaf("Particle.PID")->GetValue(2) == 21)
+	    jettype = 0.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) <= 3)
+	    jettype = 1.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 4)
+	    jettype = 2.;
+	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 5)
+	    jettype = 3.;
+	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(2);
+	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(2);
+	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(2);
+	  parton_e = itree->GetLeaf("Particle.E")->GetValue(2);
+          
+	}
       }
       
       if (jettype>-1.){
+        outfile << "jettype=" << jettype << "\n";
 
 	fastjet::PseudoJet sdJet = (softDrop)(jet);
 
