@@ -194,8 +194,8 @@ int main(int argc, char *argv[])
 
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
-    if( k>100) break;
-    //if (k%100==0)
+    if( k>2000) break;
+    if (k%100==0)
       std::cout << k << " / " << nevt << std::endl;
 
     input_particles.clear();
@@ -324,25 +324,36 @@ int main(int argc, char *argv[])
       int mother_Idx = -1;
       int dau1_Idx = -1;
       int dau2_Idx = -1;
-
+      int m_pdgId = -99;
+      bool last_copy = false;
+      int first_copy = -1;
       for (unsigned int w=0; w<nparts; w++){
         
         double dPt = TMath::Abs(itree->GetLeaf("Particle.PT")->GetValue(w) - z.Pt());
         double dPhi = deltaPhi(itree->GetLeaf("Particle.Phi")->GetValue(w), z.Phi());
-        if ( (dPt<0.00001) && (dPhi - TMath::Pi() < 0.00001) && (itree->GetLeaf("Particle.PID")->GetValue(w) != 23) && (itree->GetLeaf("Particle.D1")->GetValue(w) != itree->GetLeaf("Particle.D2")->GetValue(w))){
-          mother_Idx = w;
-          dau1_Idx = itree->GetLeaf("Particle.D1")->GetValue(w);
-          dau2_Idx = itree->GetLeaf("Particle.D2")->GetValue(w);
-          m_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
-          m_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
-          m_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
-          m_parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
-          break;
+        if ( (dPt<0.00001) && (dPhi - TMath::Pi() < 0.00001) && (itree->GetLeaf("Particle.PID")->GetValue(w) != 23) ){ //first parton with same pt and opposite phi as Z boson 
+          first_copy = w;
+          m_pdgId = itree->GetLeaf("Particle.PID")->GetValue(w);
+	  break;
+        } 
 
-        }
+      }
+      for (unsigned int w=first_copy; w<nparts; w++){
+        if( m_pdgId != itree->GetLeaf("Particle.PID")->GetValue(w)) continue; //only look at subsequent particles of same type 
+	if( itree->GetLeaf("Particle.D1")->GetValue(w) == itree->GetLeaf("Particle.D2")->GetValue(w)) continue; //if D1==D2 it's not the last copy
+	else{  //it is the last copy
+	  mother_Idx = w;
+	  dau1_Idx = itree->GetLeaf("Particle.D1")->GetValue(w);
+	  dau2_Idx = itree->GetLeaf("Particle.D2")->GetValue(w);
+	  break;
+	}
       }
 
       if (mother_Idx>-1){
+          m_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(mother_Idx);
+          m_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(mother_Idx);
+          m_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(mother_Idx);
+          m_parton_e = itree->GetLeaf("Particle.E")->GetValue(mother_Idx);
           if (dau1_Idx>-1){
               p1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(dau1_Idx),itree->GetLeaf("Particle.Eta")->GetValue(dau1_Idx),itree->GetLeaf("Particle.Phi")->GetValue(dau1_Idx),itree->GetLeaf("Particle.E")->GetValue(dau1_Idx));
       	      dau1_parton_pt = p1.Pt();
@@ -357,12 +368,11 @@ int main(int argc, char *argv[])
               dau2_parton_phi = p2.Phi();
               dau2_parton_e = p2.E();
 	  }
-          std::cout <<"mother " << itree->GetLeaf("Particle.PID")->GetValue(mother_Idx)<<"\tdau1 " << itree->GetLeaf("Particle.PID")->GetValue(dau1_Idx) << "\tdau2 " << itree->GetLeaf("Particle.PID")->GetValue(dau2_Idx) << std::endl;
+          //std::cout <<"mother " << itree->GetLeaf("Particle.PID")->GetValue(mother_Idx)<<"\tdau1 " << itree->GetLeaf("Particle.PID")->GetValue(dau1_Idx) << "\tdau2 " << itree->GetLeaf("Particle.PID")->GetValue(dau2_Idx) << std::endl;
           if (dau1_Idx == -1 || dau2_Idx==-1) continue; //?
 	  if ((tmp.DeltaR(p1)>0.8) && (tmp.DeltaR(p2)>0.8)) continue;
 
-          int m_pdgId, dau1_pdgId, dau2_pdgId;
-          m_pdgId    = itree->GetLeaf("Particle.PID")->GetValue(mother_Idx);
+          int dau1_pdgId, dau2_pdgId;
           dau1_pdgId = itree->GetLeaf("Particle.PID")->GetValue(dau1_Idx);
           dau2_pdgId = itree->GetLeaf("Particle.PID")->GetValue(dau2_Idx);
 
