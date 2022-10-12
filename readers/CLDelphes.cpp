@@ -281,10 +281,10 @@ int main(int argc, char *argv[])
 	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 25){
 	  has_higgs = true;
 	  higgs.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),125);
-	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
-	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
-	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
-	  parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
+	  m_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
+	  m_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
+	  m_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
+	  m_parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
 	  break;
 	}
       }
