@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
-    if( k>2000) break;
+    //if( k>2000) break;
     if (k%100==0)
       std::cout << k << " / " << nevt << std::endl;
 
@@ -444,8 +444,8 @@ int main(int argc, char *argv[])
       */ 
       
       if (jettype>-1.){
-	std::cout << jettype << std::endl;
-        outfile << jettype << "\n";
+	//std::cout << jettype << std::endl;
+        //outfile << jettype << "\n";
 
 	fastjet::PseudoJet sdJet = (softDrop)(jet);
 
