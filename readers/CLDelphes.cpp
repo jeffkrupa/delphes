@@ -289,10 +289,10 @@ int main(int argc, char *argv[])
 	    jettype = 2.;
 	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 5)
 	    jettype = 3.;
-	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(0);
-	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(0);
-	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(0);
-	  parton_e = itree->GetLeaf("Particle.E")->GetValue(0);
+      	  dau1_parton_pt = p1.Pt();
+          dau1_parton_eta = p1.Eta();
+          dau1_parton_phi = p1.Phi();
+          dau1_parton_e = p1.E();
 	}
 	else if ((tmp.DeltaR(p1)>0.8) && (tmp.DeltaR(p2)<0.8)){
 	  if (itree->GetLeaf("Particle.PID")->GetValue(2) == 21)
@@ -303,10 +303,10 @@ int main(int argc, char *argv[])
 	    jettype = 2.;
 	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 5)
 	    jettype = 3.;
-	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(1);
-	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(1);
-	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(1);
-	  parton_e = itree->GetLeaf("Particle.E")->GetValue(1);
+          dau2_parton_pt = p2.Pt();
+          dau2_parton_eta = p2.Eta();
+          dau2_parton_phi = p2.Phi();
+          dau2_parton_e = p2.E();
 	}
         else if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)<0.8)){
 	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) <= 3) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) <= 3))
@@ -315,6 +315,16 @@ int main(int argc, char *argv[])
 	    jettype = 6.; //gcc
 	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 5) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 5))
 	    jettype = 7.; //gbb
+
+      	  dau1_parton_pt = p1.Pt();
+          dau1_parton_eta = p1.Eta();
+          dau1_parton_phi = p1.Phi();
+          dau1_parton_e = p1.E();
+
+          dau2_parton_pt = p2.Pt();
+          dau2_parton_eta = p2.Eta();
+          dau2_parton_phi = p2.Phi();
+          dau2_parton_e = p2.E();
           
         }
       }
