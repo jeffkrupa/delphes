@@ -76,6 +76,13 @@ fill(vector<float> &vattr, vector<PFCand> &particles, T fn_attr)
 }
 
 //---------------------------------------------------------------------------
+//
+Double_t deltaPhi(float phi1, float phi2){
+    Double_t deltaPhi = TMath::Abs(phi1-phi2);
+    if(deltaPhi > TMath::Pi())
+        deltaPhi = TMath::TwoPi() - deltaPhi;
+    return deltaPhi;
+}
 
 int main(int argc, char *argv[])
 {
@@ -115,21 +122,45 @@ int main(int argc, char *argv[])
   vdz.reserve(NMAX);
 
   float jettype=-1.; // 0: gluon, 1: light quark, 2: charm, 3: b, 4: Higgs, 5: Z, 6: top
-  float parton_pt = 0.;
-  float parton_eta = 0.;
-  float parton_phi = 0.;
-  float parton_e = 0.;
+  float m_parton_pt = 0.;
+  float m_parton_eta = 0.;
+  float m_parton_phi = 0.;
+  float m_parton_e = 0.;
+  float dau1_parton_pt = 0.;
+  float dau1_parton_eta = 0.;
+  float dau1_parton_phi = 0.;
+  float dau1_parton_e = 0.;
+  float dau2_parton_pt = 0.;
+  float dau2_parton_eta = 0.;
+  float dau2_parton_phi = 0.;
+  float dau2_parton_e = 0.;
   float jet_pt = 0.;
   float jet_eta = 0.;
   float jet_phi = 0.;
   float jet_e = 0.;
   float jet_msd = 0.;
   float jet_n2 = -99.;
+
+  TBranch* b_m_parton_pt = tout->Branch("m_parton_pt",&m_parton_pt, "m_parton_pt/F");
+  TBranch* b_m_parton_eta = tout->Branch("m_parton_eta",&m_parton_eta, "m_parton_eta/F");
+  TBranch* b_m_parton_phi = tout->Branch("m_parton_phi",&m_parton_phi, "m_parton_phi/F");
+  TBranch* b_m_parton_e = tout->Branch("m_parton_e",&m_parton_e, "m_parton_e/F");
+
+  TBranch* b_dau1_parton_pt = tout->Branch("dau1_parton_pt",&dau1_parton_pt, "dau1_parton_pt/F");
+  TBranch* b_dau1_parton_eta = tout->Branch("dau1_parton_eta",&dau1_parton_eta, "dau1_parton_eta/F");
+  TBranch* b_dau1_parton_phi = tout->Branch("dau1_parton_phi",&dau1_parton_phi, "dau1_parton_phi/F");
+  TBranch* b_dau1_parton_e = tout->Branch("dau1_parton_e",&dau1_parton_e, "dau1_parton_e/F");
+
+  TBranch* b_dau2_parton_pt = tout->Branch("dau2_parton_pt",&dau2_parton_pt, "dau2_parton_pt/F");
+  TBranch* b_dau2_parton_eta = tout->Branch("dau2_parton_eta",&dau2_parton_eta, "dau2_parton_eta/F");
+  TBranch* b_dau2_parton_phi = tout->Branch("dau2_parton_phi",&dau2_parton_phi, "dau2_parton_phi/F");
+  TBranch* b_dau2_parton_e = tout->Branch("dau2_parton_e",&dau2_parton_e, "dau2_parton_e/F");
+
   TBranch* b_jettype = tout->Branch("jettype",&jettype, "jettype/F");
-  TBranch* b_parton_pt = tout->Branch("parton_pt",&parton_pt, "parton_pt/F");
-  TBranch* b_parton_eta = tout->Branch("parton_eta",&parton_eta, "parton_eta/F");
-  TBranch* b_parton_phi = tout->Branch("parton_phi",&parton_phi, "parton_phi/F");
-  TBranch* b_parton_e = tout->Branch("parton_e",&parton_e, "parton_e/F");
+  //TBranch* b_parton_pt = tout->Branch("parton_pt",&parton_pt, "parton_pt/F");
+  //TBranch* b_parton_eta = tout->Branch("parton_eta",&parton_eta, "parton_eta/F");
+  //TBranch* b_parton_phi = tout->Branch("parton_phi",&parton_phi, "parton_phi/F");
+  //TBranch* b_parton_e = tout->Branch("parton_e",&parton_e, "parton_e/F");
   TBranch* b_jet_pt = tout->Branch("jet_pt",&jet_pt, "jet_pt/F");
   TBranch* b_jet_eta = tout->Branch("jet_eta",&jet_eta, "jet_eta/F");
   TBranch* b_jet_phi = tout->Branch("jet_phi",&jet_phi, "jet_phi/F");
@@ -164,9 +195,6 @@ int main(int argc, char *argv[])
 
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
-    //std::cout << "event :" << k << std::endl;
-
-    //if (k>100) break;
     if (k%100==0)
       std::cout << k << " / " << nevt << std::endl;
 
@@ -227,10 +255,18 @@ int main(int argc, char *argv[])
 
 
       jettype = -1.;
-      parton_pt = 0.;
-      parton_eta = 0.;
-      parton_phi = 0.;
-      parton_e = 0.;
+      m_parton_pt = 0.;
+      m_parton_eta = 0.;
+      m_parton_phi = 0.;
+      m_parton_e = 0.;
+      dau1_parton_pt = 0.;
+      dau1_parton_eta = 0.;
+      dau1_parton_phi = 0.;
+      dau1_parton_e = 0.;
+      dau2_parton_pt = 0.;
+      dau2_parton_eta = 0.;
+      dau2_parton_phi = 0.;
+      dau2_parton_e = 0.;
 
       TLorentzVector tmp;
       tmp.SetPtEtaPhiM(jet.perp(),jet.eta(),jet.phi(),jet.m());
@@ -245,10 +281,10 @@ int main(int argc, char *argv[])
 	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 25){
 	  has_higgs = true;
 	  higgs.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),125);
-	  parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
-	  parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
-	  parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
-	  parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
+	  m_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
+	  m_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
+	  m_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
+	  m_parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
 	  break;
 	}
       }
@@ -280,6 +316,16 @@ int main(int argc, char *argv[])
 	p1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(1),itree->GetLeaf("Particle.Eta")->GetValue(1),itree->GetLeaf("Particle.Phi")->GetValue(1),itree->GetLeaf("Particle.E")->GetValue(1));
 	p2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(2),itree->GetLeaf("Particle.Eta")->GetValue(2),itree->GetLeaf("Particle.Phi")->GetValue(2),itree->GetLeaf("Particle.E")->GetValue(2));
 
+	//#### jettypes
+        //g
+	//uds
+	//c
+	//b
+	//H
+	//g->qq
+	//g->cc
+	//g->bb
+	//#####	
 	if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)>0.8)){
 	  if (itree->GetLeaf("Particle.PID")->GetValue(1) == 21)
 	    jettype = 0.;
