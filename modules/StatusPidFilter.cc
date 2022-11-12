@@ -214,7 +214,9 @@ void StatusPidFilter::Process()
 
     // hard scattering particles (first condition for Py6, second for Py8)
     if(!fCountBs){
-      if(status > 20 && status < 30) pass = kTRUE;
+      //if(status > 20 && status < 30) pass = kTRUE;
+      pass = kTRUE;
+
 
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
