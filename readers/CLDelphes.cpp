@@ -326,6 +326,14 @@ int main(int argc, char *argv[])
 	//g->cc
 	//g->bb
 	//#####	
+	TLorentzVector m(0.,0.,0.,0.);
+        m = p1+p2;
+        m_parton_pt = m.Pt();
+        m_parton_eta = m.Eta();
+        m_parton_phi = m.Phi();
+        m_parton_e = m.E();
+        
+
 	if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)>0.8)){
 	  if (itree->GetLeaf("Particle.PID")->GetValue(1) == 21)
 	    jettype = 0.;
