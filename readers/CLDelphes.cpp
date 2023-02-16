@@ -325,6 +325,7 @@ int main(int argc, char *argv[])
 	//g->qq
 	//g->cc
 	//g->bb
+	//g->gg
 	//#####	
 	TLorentzVector m(0.,0.,0.,0.);
         m = p1+p2;
@@ -369,7 +370,8 @@ int main(int argc, char *argv[])
 	    jettype = 6.; //gcc
 	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 5) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 5))
 	    jettype = 7.; //gbb
-
+	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 21) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 21))
+            jettype = 8.; //ggg
       	  dau1_parton_pt = p1.Pt();
           dau1_parton_eta = p1.Eta();
           dau1_parton_phi = p1.Phi();
