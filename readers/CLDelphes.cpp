@@ -325,6 +325,7 @@ int main(int argc, char *argv[])
 	//g->qq
 	//g->cc
 	//g->bb
+	//g->gg
 	//#####	
 	if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)>0.8)){
 	  if (itree->GetLeaf("Particle.PID")->GetValue(1) == 21)
@@ -361,6 +362,8 @@ int main(int argc, char *argv[])
 	    jettype = 6.; //gcc
 	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 5) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 5))
 	    jettype = 7.; //gbb
+	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 21) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 21))
+	    jettype = 8.; //ggg
 
       	  dau1_parton_pt = p1.Pt();
           dau1_parton_eta = p1.Eta();
