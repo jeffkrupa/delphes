@@ -12,7 +12,7 @@
 # Order of execution of various modules
 #######################################
 
-set RandomSeed XXX
+set RandomSeed 123
 set MaxEvents 10000
 
 set ExecutionPath {
@@ -105,7 +105,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /eos/cms/store/user/bmaier/cl/PileUp_21.data
+  set PileUpFile /YYY/PileUp_21.data
 
   # average expected pile up
   set MeanPileUp 0
