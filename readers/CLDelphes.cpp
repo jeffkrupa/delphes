@@ -189,8 +189,8 @@ int main(int argc, char *argv[])
   fastjet::contrib::SoftDrop softDrop = fastjet::contrib::SoftDrop(sdBeta,sdZcut,radius);
   EnergyCorrelatorNseries N2fj(2,1.0,EnergyCorrelator::pt_R);
 
-  std::ofstream outfile;
-  outfile.open("../../jettype.txt", std::ios_base::trunc);
+  //std::ofstream outfile;
+  //outfile.open("../../jettype.txt", std::ios_base::trunc);
 
   for (unsigned int k=0; k<nevt; k++){
     itree->GetEntry(k);
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
 	  }
 	}
 
-	if ((tmp.DeltaR(higgs)<0.8) && (tmp.DeltaR(b1)<0.8) && (tmp.DeltaR(b2)<0.8)) {
+	if ((tmp.DeltaR(higgs)<0.5) && (tmp.DeltaR(b1)<0.8) && (tmp.DeltaR(b2)<0.8)) {
 	  jettype = 4.;
 	}
       }
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
         m_parton_e = m.E();
         
 
-	if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)>0.8)){
+	/*if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)>0.8)){
 	  if (itree->GetLeaf("Particle.PID")->GetValue(1) == 21)
 	    jettype = 0.;
 	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(1)) <= 3)
@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
           dau1_parton_phi = p1.Phi();
           dau1_parton_e = p1.E();
 	}
-	else if ((tmp.DeltaR(p1)>0.8) && (tmp.DeltaR(p2)<0.8)){
+	if ((tmp.DeltaR(p1)>0.8) && (tmp.DeltaR(p2)<0.8)){
 	  if (itree->GetLeaf("Particle.PID")->GetValue(2) == 21)
 	    jettype = 0.;
 	  else if (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) <= 3)
@@ -362,8 +362,8 @@ int main(int argc, char *argv[])
           dau2_parton_eta = p2.Eta();
           dau2_parton_phi = p2.Phi();
           dau2_parton_e = p2.E();
-	}
-        else if ((tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)<0.8)){
+	}*/
+        if ((tmp.DeltaR(m)<0.5) && (tmp.DeltaR(p1)<0.8) && (tmp.DeltaR(p2)<0.8)){
 	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) <= 3) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) <= 3))
 	    jettype = 5.; //glightlight
 	  if ((abs(itree->GetLeaf("Particle.PID")->GetValue(1)) == 4) && (abs(itree->GetLeaf("Particle.PID")->GetValue(2)) == 4))
@@ -508,9 +508,8 @@ int main(int argc, char *argv[])
 	tout->Fill();
 
       }
-
+      if (dau1_parton_pt > 0.) break;
     }
-
     //tout->Fill();
 
     progressBar.Update(k, k);
