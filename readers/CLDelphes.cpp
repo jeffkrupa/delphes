@@ -156,6 +156,11 @@ int main(int argc, char *argv[])
   TBranch* b_dau2_parton_phi = tout->Branch("dau2_parton_phi",&dau2_parton_phi, "dau2_parton_phi/F");
   TBranch* b_dau2_parton_e = tout->Branch("dau2_parton_e",&dau2_parton_e, "dau2_parton_e/F");
 
+  TBranch* b_dau3_parton_pt = tout->Branch("dau3_parton_pt",&dau3_parton_pt, "dau3_parton_pt/F");
+  TBranch* b_dau3_parton_eta = tout->Branch("dau3_parton_eta",&dau3_parton_eta, "dau3_parton_eta/F");
+  TBranch* b_dau3_parton_phi = tout->Branch("dau3_parton_phi",&dau3_parton_phi, "dau3_parton_phi/F");
+  TBranch* b_dau3_parton_e = tout->Branch("dau3_parton_e",&dau3_parton_e, "dau3_parton_e/F");
+
   TBranch* b_jettype = tout->Branch("jettype",&jettype, "jettype/F");
   TBranch* b_jet_pt = tout->Branch("jet_pt",&jet_pt, "jet_pt/F");
   TBranch* b_jet_eta = tout->Branch("jet_eta",&jet_eta, "jet_eta/F");
