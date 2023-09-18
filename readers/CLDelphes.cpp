@@ -156,11 +156,6 @@ int main(int argc, char *argv[])
   TBranch* b_dau2_parton_phi = tout->Branch("dau2_parton_phi",&dau2_parton_phi, "dau2_parton_phi/F");
   TBranch* b_dau2_parton_e = tout->Branch("dau2_parton_e",&dau2_parton_e, "dau2_parton_e/F");
 
-  TBranch* b_dau3_parton_pt = tout->Branch("dau3_parton_pt",&dau3_parton_pt, "dau3_parton_pt/F");
-  TBranch* b_dau3_parton_eta = tout->Branch("dau3_parton_eta",&dau3_parton_eta, "dau3_parton_eta/F");
-  TBranch* b_dau3_parton_phi = tout->Branch("dau3_parton_phi",&dau3_parton_phi, "dau3_parton_phi/F");
-  TBranch* b_dau3_parton_e = tout->Branch("dau3_parton_e",&dau3_parton_e, "dau3_parton_e/F");
-
   TBranch* b_jettype = tout->Branch("jettype",&jettype, "jettype/F");
   TBranch* b_jet_pt = tout->Branch("jet_pt",&jet_pt, "jet_pt/F");
   TBranch* b_jet_eta = tout->Branch("jet_eta",&jet_eta, "jet_eta/F");
@@ -280,7 +275,9 @@ int main(int argc, char *argv[])
       nparts = itree->GetLeaf("Particle_size")->GetValue(0);
 
       bool has_higgs = false;
+      bool has_top = false;
       TLorentzVector higgs(0.,0.,0.,0);
+      TLorentzVector top(0.,0.,0.,0);
       for (unsigned int w=0; w<nparts; w++){
 	
 	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 25){
@@ -292,6 +289,17 @@ int main(int argc, char *argv[])
 	  m_parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
 	  break;
 	}
+
+	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 6){
+	  has_top = true;
+	  top.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),172.8);
+	  m_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
+	  m_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
+	  m_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
+	  m_parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
+	  break;
+	}
+
       }
 
       if (has_higgs){	
@@ -314,6 +322,32 @@ int main(int argc, char *argv[])
 	if ((tmp.DeltaR(higgs)<0.5) && (tmp.DeltaR(b1)<0.8) && (tmp.DeltaR(b2)<0.8)) {
 	  jettype = 4.;
 	}
+      }
+      else if(has_top){
+        TLorentzVector q1(0.,0.,0.,0);
+        TLorentzVector q2(0.,0.,0.,0);
+        TLorentzVector q3(0.,0.,0.,0);
+
+        int qsfound = 0;
+        for (unsigned int w=0; w<nparts; w++){
+          if (abs(itree->GetLeaf("Particle.PID")->GetValue(itree->GetLeaf("Particle.M1")->GetValue(w))) == 24){
+            qsfound += 1;
+            if (q1.E() == 0)
+              q1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
+            else
+              q2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w)); 
+          if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 5){
+            qsfound += 1;
+            q3.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
+          }
+
+          if (qsfound == 3)
+            break;  
+          }
+        }
+        if ((tmp.DeltaR(top)<0.5) && (tmp.DeltaR(q1)<0.8) && (tmp.DeltaR(q2)<0.8) &&(tmp.DeltaR(q3)<0.8)){
+          jettype=10.;
+        }
       }
       else{
 	TLorentzVector p1(0.,0.,0.,0);
