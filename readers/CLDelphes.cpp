@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
 	  break;
 	}
 
-	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 6){
+	if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 6){
 	  has_top = true;
 	  top.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),172.8);
 	  m_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
@@ -324,23 +324,33 @@ int main(int argc, char *argv[])
 	}
       }
       else if(has_top){
+        //std::cout << "$$$ Event has top" << std::endl;
         TLorentzVector q1(0.,0.,0.,0);
         TLorentzVector q2(0.,0.,0.,0);
         TLorentzVector q3(0.,0.,0.,0);
         int qsfound = 0;
         for (unsigned int w=0; w<nparts; w++){
-          if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 24){
+          /*if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 24){
             int dau1 = itree->GetLeaf("Particle.D1")->GetValue(w);
             int dau2 = itree->GetLeaf("Particle.D2")->GetValue(w);
+            std::cout << " Found W. Daughters = " << dau1 << " " << dau2 << std::endl; 
             qsfound += 2;
             if (q1.E() == 0)
               q1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(dau1),itree->GetLeaf("Particle.Eta")->GetValue(dau1),itree->GetLeaf("Particle.Phi")->GetValue(dau1),itree->GetLeaf("Particle.E")->GetValue(dau1));
             else
               q2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(dau2),itree->GetLeaf("Particle.Eta")->GetValue(dau2),itree->GetLeaf("Particle.Phi")->GetValue(dau2),itree->GetLeaf("Particle.E")->GetValue(dau2));
+          }*/
+          if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) <= 4){
+            //std::cout << "Found light quark = " << w << std::endl;
+            qsfound += 1;
+            if (q1.E() == 0)
+              q1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
+            else
+              q2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w)); 
           } 
           if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) == 5){
+            //std::cout << "Found b = " << w << std::endl;
             qsfound += 1;
-            //std::cout << "pdgid/pt/eta/phi\t" << itree->GetLeaf("Particle.PID")->GetValue(w) << "/" << itree->GetLeaf("Particle.PT")->GetValue(w) << "/" << itree->GetLeaf("Particle.Eta")->GetValue(w) << "/" << itree->GetLeaf("Particle.Phi")->GetValue(w) << std::endl;
             q3.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
           }
 
@@ -348,8 +358,10 @@ int main(int argc, char *argv[])
             break;  
         }
         if ((tmp.DeltaR(top)<0.5) && (tmp.DeltaR(q1)<0.8) && (tmp.DeltaR(q2)<0.8) &&(tmp.DeltaR(q3)<0.8)){
+          //std::cout << "Reco jet pt/eta/phi/m = " << tmp.Pt() << "/" << tmp.Eta() << "/" << tmp.Phi() << "/" << tmp.M() << std::endl;
           jettype=10.;
         }
+
       }
       else{
 	TLorentzVector p1(0.,0.,0.,0);
@@ -513,7 +525,7 @@ int main(int argc, char *argv[])
       */ 
       
       if (jettype>-1.){
-	//std::cout << jettype << std::endl;
+	//std::cout << "$$$ END EVENT, jettype=" << jettype << std::endl;
         //outfile << jettype << "\n";
 
 	fastjet::PseudoJet sdJet = (softDrop)(jet);
