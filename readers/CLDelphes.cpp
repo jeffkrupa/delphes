@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
         }
         if ((tmp.DeltaR(top)<0.5) && (tmp.DeltaR(q1)<0.8) && (tmp.DeltaR(q2)<0.8) &&(tmp.DeltaR(q3)<0.8)){
           //std::cout << "Reco jet pt/eta/phi/m = " << tmp.Pt() << "/" << tmp.Eta() << "/" << tmp.Phi() << "/" << tmp.M() << std::endl;
-          jettype=10.;
+          jettype=11.;
         }
 
       }
