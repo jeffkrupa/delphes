@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
             break;  
         }
         if ((tmp.DeltaR(top)<0.5) && (tmp.DeltaR(q1)<0.8) && (tmp.DeltaR(q2)<0.8) &&(tmp.DeltaR(q3)<0.8)){
-          jettype=10.;
+          jettype=11.;
         }
 
       }
