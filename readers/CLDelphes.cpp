@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
 
 	int qsfound = 0;
 	for (unsigned int w=0; w<nparts; w++){
-           if (itree->GetLeaf("Particle.M1") != 3) continue;
+           if (itree->GetLeaf("Particle.M1")->GetValue(w) != 3) continue;
 	   if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) <= 5){
 	    qsfound += 1;
 	    if (q1.E() == 0)
