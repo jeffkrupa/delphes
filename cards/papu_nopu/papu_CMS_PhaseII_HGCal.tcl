@@ -105,7 +105,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /YYY/PileUp_21.data
+  set PileUpFile //afs/cern.ch/work/j/jekrupa/public/codec/samples/pythia/delphes/../PileUp_21.data
 
   # average expected pile up
   set MeanPileUp 0

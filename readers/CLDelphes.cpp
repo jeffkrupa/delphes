@@ -10,7 +10,7 @@
 #include <numeric>
 #include <fstream>
 #include "TROOT.h"
-
+#include <cassert>
 #include "TFile.h"
 #include "TTree.h"
 #include "TLeaf.h"
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
   unsigned int nevt = itree->GetEntries();
   TBranch* partbranch = (TBranch*)itree->GetBranch("Particle");
   TBranch* pfbranch = (TBranch*)itree->GetBranch("ParticleFlowCandidate");
-  std::cout << "NEVT: " << nevt << std::endl;
+  //std::cout << "NEVT: " << nevt << std::endl;
   vector<PFCand> input_particles;
   vector<PFCand> output_particles;
   output_particles.reserve(NMAX);
@@ -183,9 +183,10 @@ int main(int argc, char *argv[])
   //outfile.open("../../jettype.txt", std::ios_base::trunc);
 
   for (unsigned int k=0; k<nevt; k++){
+    //std::cout <<"NEW EVENT ========" << std::endl;
     itree->GetEntry(k);
     //if( k>2000) break;
-    if (k%100==0)
+    if (k%1000==0)
       std::cout << k << " / " << nevt << std::endl;
 
     input_particles.clear();
@@ -231,13 +232,16 @@ int main(int argc, char *argv[])
 
     fastjet::ClusterSequence seq(sorted_by_pt(finalStates), *jetDef);
 
-    float minpt = 400;
+    float minpt = 300;
     float maxeta = 2.5;
     vector<fastjet::PseudoJet> allJets(sorted_by_pt(seq.inclusive_jets(minpt)));
 
     bool has_match = false;
-
+    int jetidx = 0;
     for (auto& jet : allJets) {
+      
+      //std::cout << "JET " << jetidx << " PT:"<< jet.perp() << " ETA:" << jet.eta() << std::endl;
+      ++jetidx;
       if (jet.perp() < minpt || abs(jet.eta()) > maxeta )
 	break;
 
@@ -266,11 +270,12 @@ int main(int argc, char *argv[])
 
       bool has_zprime = false;
       TLorentzVector zprime(0.,0.,0.,0);
+      //std::cout <<"here0"<<std::endl;
       for (unsigned int w=0; w<nparts; w++){
-	
+	//std::cout << "mass:" << itree->GetLeaf("Particle.Mass")->GetValue(w) << std::endl;
 	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 55){
 	  has_zprime = true;
-	  zprime.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.M")->GetValue(w));
+	  zprime.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.Mass")->GetValue(w));
 	  m_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(w);
 	  m_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
 	  m_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
@@ -278,33 +283,35 @@ int main(int argc, char *argv[])
 	  break;
 	}
       }
-
+      //std::cout << "start_particles" << std::endl;
+      //for (unsigned int w=0; w<nparts; w++){
+      //    std::cout << "particle" << w << " pdgId=" << itree->GetLeaf("Particle.PID")->GetValue(w) << " M1="<<itree->GetLeaf("Particle.M1")->GetValue(w) << " M2=" << itree->GetLeaf("Particle.M2")->GetValue(w) << " D1=" << itree->GetLeaf("Particle.D1")->GetValue(w) << " D2=" << itree->GetLeaf("Particle.D2")->GetValue(w) << std::endl;
+      //}
+      //std::cout << "end_particles" << std::endl;
+      //std::cout << has_zprime << std::endl;
+      //std::cout <<"here1"<<std::endl;
       if (has_zprime){	
 	TLorentzVector q1(0.,0.,0.,0);
 	TLorentzVector q2(0.,0.,0.,0);
 
 	int qsfound = 0;
-	for (unsigned int w=0; w<nparts; w++){
-           if (itree->GetLeaf("Particle.M1")->GetValue(w) != 3) continue;
-	   if (abs(itree->GetLeaf("Particle.PID")->GetValue(w)) <= 5){
-	    qsfound += 1;
-	    if (q1.E() == 0)
-	      q1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
-	    else
-	      q2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.E")->GetValue(w));
-	    if (qsfound == 2)
-	      break;
-	  }
-	}
-
+        int q1idx = nparts-1;
+        int q2idx = nparts-2;
+        q1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(q1idx),itree->GetLeaf("Particle.Eta")->GetValue(q1idx),itree->GetLeaf("Particle.Phi")->GetValue(q1idx),itree->GetLeaf("Particle.E")->GetValue(q1idx));
+        q2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(q2idx),itree->GetLeaf("Particle.Eta")->GetValue(q2idx),itree->GetLeaf("Particle.Phi")->GetValue(q2idx),itree->GetLeaf("Particle.E")->GetValue(q2idx));
+        assert(itree->GetLeaf("Particle.M1")->GetValue(q1idx) == itree->GetLeaf("Particle.M1")->GetValue(q2idx) );
+        //std::cout << "\tq1 : pt=" << q1.Pt()  << " eta=" << q1.Eta() << " phi=" << q1.Phi() << std::endl;
+        //std::cout << "\tq2 : pt=" << q2.Pt()  << " eta=" << q2.Eta() << " phi=" << q2.Phi() << std::endl;
+        //std::cout << tmp.DeltaR(zprime) << "/" << tmp.DeltaR(q1) << "/" << tmp.DeltaR(q2) << std::endl;
 	if ((tmp.DeltaR(zprime)<0.5) && (tmp.DeltaR(q1)<0.8) && (tmp.DeltaR(q2)<0.8)) {
 	  jettype = 1.;
 	}
       }
-      else if (! has_zprime) {
+      else {
 	  jettype = 0.; 
       } 
       
+      //std::cout <<"here2"<<std::endl;
       if (jettype>-1.){
 	//std::cout << jettype << std::endl;
         //outfile << jettype << "\n";
@@ -342,7 +349,8 @@ int main(int argc, char *argv[])
 	tout->Fill();
 
       }
-      if (dau1_parton_pt > 0.) break;
+      if (jettype > -1) break;
+      //if (dau1_parton_pt > 0.) break;
     }
     //tout->Fill();
 
