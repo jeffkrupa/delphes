@@ -126,6 +126,15 @@ int main(int argc, char *argv[])
   float m_parton_eta = 0.;
   float m_parton_phi = 0.;
   float m_parton_e = 0.;
+  float m_parton_mass = 0.;
+  float d1_parton_pt = 0.;
+  float d1_parton_eta = 0.;
+  float d1_parton_phi = 0.;
+  float d1_parton_e = 0.;
+  float d2_parton_pt = 0.;
+  float d2_parton_eta = 0.;
+  float d2_parton_phi = 0.;
+  float d2_parton_e = 0.;
   float dau1_parton_pt = 0.;
   float dau1_parton_eta = 0.;
   float dau1_parton_phi = 0.;
@@ -139,12 +148,22 @@ int main(int argc, char *argv[])
   float jet_phi = 0.;
   float jet_e = 0.;
   float jet_msd = 0.;
+  float jet_m = 0.;
   float jet_n2 = -99.;
 
   TBranch* b_m_parton_pt = tout->Branch("m_parton_pt",&m_parton_pt, "m_parton_pt/F");
   TBranch* b_m_parton_eta = tout->Branch("m_parton_eta",&m_parton_eta, "m_parton_eta/F");
   TBranch* b_m_parton_phi = tout->Branch("m_parton_phi",&m_parton_phi, "m_parton_phi/F");
   TBranch* b_m_parton_e = tout->Branch("m_parton_e",&m_parton_e, "m_parton_e/F");
+  TBranch* b_m_parton_mass = tout->Branch("m_parton_mass",&m_parton_mass, "m_parton_mass/F");
+  TBranch* b_d1_parton_pt = tout->Branch("d1_parton_pt",&d1_parton_pt, "d1_parton_pt/F");
+  TBranch* b_d1_parton_eta = tout->Branch("d1_parton_eta",&d1_parton_eta, "d1_parton_eta/F");
+  TBranch* b_d1_parton_phi = tout->Branch("d1_parton_phi",&d1_parton_phi, "d1_parton_phi/F");
+  TBranch* b_d1_parton_e = tout->Branch("d1_parton_e",&d1_parton_e, "d1_parton_e/F");
+  TBranch* b_d2_parton_pt = tout->Branch("d2_parton_pt",&d2_parton_pt, "d2_parton_pt/F");
+  TBranch* b_d2_parton_eta = tout->Branch("d2_parton_eta",&d2_parton_eta, "d2_parton_eta/F");
+  TBranch* b_d2_parton_phi = tout->Branch("d2_parton_phi",&d2_parton_phi, "d2_parton_phi/F");
+  TBranch* b_d2_parton_e = tout->Branch("d2_parton_e",&d2_parton_e, "d2_parton_e/F");
 
   TBranch* b_jettype = tout->Branch("jettype",&jettype, "jettype/F");
   TBranch* b_jet_pt = tout->Branch("jet_pt",&jet_pt, "jet_pt/F");
@@ -152,6 +171,7 @@ int main(int argc, char *argv[])
   TBranch* b_jet_phi = tout->Branch("jet_phi",&jet_phi, "jet_phi/F");
   TBranch* b_jet_e = tout->Branch("jet_e",&jet_e, "jet_e/F");
   TBranch* b_jet_msd = tout->Branch("jet_msd",&jet_msd, "jet_msd/F");
+  TBranch* b_jet_m = tout->Branch("jet_m",&jet_m, "jet_m/F");
   TBranch* b_jet_n2 = tout->Branch("jet_n2",&jet_n2, "jet_n2/F");
 
   // jet branches
@@ -165,6 +185,7 @@ int main(int argc, char *argv[])
   tout->Branch("dz", &vdz);
   tout->Branch("pdgid", &vpdgid);
 
+  bool debug = false;
   ExRootProgressBar progressBar(nevt);
   
   auto comp_p4 = [](auto &a, auto &b) { return a.pt > b.pt; };
@@ -182,18 +203,20 @@ int main(int argc, char *argv[])
   //std::ofstream outfile;
   //outfile.open("../../jettype.txt", std::ios_base::trunc);
 
-  for (unsigned int k=0; k<100; k++){
+  for (unsigned int k=0; k<itree->GetEntries(); k++){
     //std::cout <<"NEW EVENT ========" << std::endl;
     itree->GetEntry(k);
-    //if( k>10) break;
-    if (k%1000==0)
+    //if( k>1000) break;
+    //if (k%1000==0)
+
       //std::cout << k << " / " << nevt << std::endl;
 
     input_particles.clear();
+
     unsigned int npfs = pfbranch->GetEntries();
     npfs = itree->GetLeaf("ParticleFlowCandidate_size")->GetValue(0);
-    std::cout << npfs << std::endl;
     for (unsigned int j=0; j<npfs; j++){
+      //if (j==0) { std::cout << "particle pt" << itree->GetLeaf("ParticleFlowCandidate.PT")->GetValue(j)<< std::endl; }
       PFCand tmppf;
       tmppf.pt = itree->GetLeaf("ParticleFlowCandidate.PT")->GetValue(j);
       if (tmppf.pt < 1.0) { continue; }
@@ -220,9 +243,10 @@ int main(int argc, char *argv[])
     vector<fastjet::PseudoJet> finalStates;
     int pfid = 0;
     for(auto &p : input_particles){
+
       TLorentzVector tmp;
       tmp.SetPtEtaPhiE(p.pt,p.eta,p.phi,p.e);
-
+      //if (pfid==0) {std::cout << "part0 pt" << p.pt << std::endl; } 
       fastjet::PseudoJet curjet(tmp.Px(), tmp.Py(), tmp.Pz(), tmp.E());
       curjet.set_user_index(pfid);    
       finalStates.emplace_back(curjet);
@@ -232,17 +256,19 @@ int main(int argc, char *argv[])
 
     fastjet::ClusterSequence seq(sorted_by_pt(finalStates), *jetDef);
 
-    float minpt = 500;
+    float minpt = 400;
+    float minmass = 20;
     float maxeta = 2.5;
     vector<fastjet::PseudoJet> allJets(sorted_by_pt(seq.inclusive_jets(minpt)));
-    std::cout << "allJets.size()" << allJets.size() << std::endl;
+    //std::cout << "allJets.size()" << allJets.size() << std::endl;
     bool has_match = false;
     int jetidx = 0;
     for (auto& jet : allJets) {
-      
-      //std::cout << "JET " << jetidx << " PT:"<< jet.perp() << " ETA:" << jet.eta() << std::endl;
+      if (debug) {  
+        std::cout << "JET loop: " << jetidx << " PT:"<< jet.perp() << " ETA:" << jet.eta() << std::endl;
+      }
       ++jetidx;
-      if (jet.perp() < minpt || abs(jet.eta()) > maxeta )
+      if (jet.perp() < minpt || abs(jet.eta()) > maxeta || jet.m() > minmass)
 	break;
 
       output_particles.clear();
@@ -253,14 +279,15 @@ int main(int argc, char *argv[])
       m_parton_eta = 0.;
       m_parton_phi = 0.;
       m_parton_e = 0.;
-      dau1_parton_pt = 0.;
-      dau1_parton_eta = 0.;
-      dau1_parton_phi = 0.;
-      dau1_parton_e = 0.;
-      dau2_parton_pt = 0.;
-      dau2_parton_eta = 0.;
-      dau2_parton_phi = 0.;
-      dau2_parton_e = 0.;
+      m_parton_mass = 0.;
+      d1_parton_pt = 0.;
+      d1_parton_eta = 0.;
+      d1_parton_phi = 0.;
+      d1_parton_e = 0.;
+      d2_parton_pt = 0.;
+      d2_parton_eta = 0.;
+      d2_parton_phi = 0.;
+      d2_parton_e = 0.;
 
       TLorentzVector tmp;
       tmp.SetPtEtaPhiM(jet.perp(),jet.eta(),jet.phi(),jet.m());
@@ -270,9 +297,7 @@ int main(int argc, char *argv[])
 
       bool has_zprime = false;
       TLorentzVector zprime(0.,0.,0.,0);
-      //std::cout <<"here0"<<std::endl;
       for (unsigned int w=0; w<nparts; w++){
-	//std::cout << "mass:" << itree->GetLeaf("Particle.Mass")->GetValue(w) << std::endl;
 	if (itree->GetLeaf("Particle.PID")->GetValue(w) == 55){
 	  has_zprime = true;
 	  zprime.SetPtEtaPhiM(itree->GetLeaf("Particle.PT")->GetValue(w),itree->GetLeaf("Particle.Eta")->GetValue(w),itree->GetLeaf("Particle.Phi")->GetValue(w),itree->GetLeaf("Particle.Mass")->GetValue(w));
@@ -280,18 +305,13 @@ int main(int argc, char *argv[])
 	  m_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(w);
 	  m_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(w);
 	  m_parton_e = itree->GetLeaf("Particle.E")->GetValue(w);
+	  m_parton_mass = itree->GetLeaf("Particle.Mass")->GetValue(w);
+          if (debug) { 
+            std::cout <<"\tevent has Zprime" << std::endl;
+          }
 	  break;
 	}
       }
-      /*
-      std::cout << "start_particles" << std::endl;
-      for (unsigned int w=0; w<nparts; w++){
-          std::cout << "particle" << w << " pdgId=" << itree->GetLeaf("Particle.PID")->GetValue(w) << " M1="<<itree->GetLeaf("Particle.M1")->GetValue(w) << " M2=" << itree->GetLeaf("Particle.M2")->GetValue(w) << " D1=" << itree->GetLeaf("Particle.D1")->GetValue(w) << " D2=" << itree->GetLeaf("Particle.D2")->GetValue(w) << std::endl;
-      }
-      std::cout << "end_particles" << std::endl;
-      std::cout << has_zprime << std::endl;
-      //std::cout <<"here1"<<std::endl;
-      */
       if (has_zprime){	
 	TLorentzVector q1(0.,0.,0.,0);
 	TLorentzVector q2(0.,0.,0.,0);
@@ -301,22 +321,37 @@ int main(int argc, char *argv[])
         int q2idx = nparts-2;
         q1.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(q1idx),itree->GetLeaf("Particle.Eta")->GetValue(q1idx),itree->GetLeaf("Particle.Phi")->GetValue(q1idx),itree->GetLeaf("Particle.E")->GetValue(q1idx));
         q2.SetPtEtaPhiE(itree->GetLeaf("Particle.PT")->GetValue(q2idx),itree->GetLeaf("Particle.Eta")->GetValue(q2idx),itree->GetLeaf("Particle.Phi")->GetValue(q2idx),itree->GetLeaf("Particle.E")->GetValue(q2idx));
+        
         assert(itree->GetLeaf("Particle.M1")->GetValue(q1idx) == itree->GetLeaf("Particle.M1")->GetValue(q2idx) );
-        //std::cout << "\tq1 : pt=" << q1.Pt()  << " eta=" << q1.Eta() << " phi=" << q1.Phi() << " pgdId=" << itree->GetLeaf("Particle.PID")->GetValue(q1idx) << std::endl;
-        //std::cout << "\tq2 : pt=" << q2.Pt()  << " eta=" << q2.Eta() << " phi=" << q2.Phi() << " pgdId=" << itree->GetLeaf("Particle.PID")->GetValue(q2idx) << std::endl;
-        //std::cout << tmp.DeltaR(zprime) << "/" << tmp.DeltaR(q1) << "/" << tmp.DeltaR(q2) << std::endl;
+	d1_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(q1idx);
+	d1_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(q1idx);
+	d1_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(q1idx);
+	d1_parton_e = itree->GetLeaf("Particle.E")->GetValue(q1idx);
+	d2_parton_pt = itree->GetLeaf("Particle.PT")->GetValue(q2idx);
+	d2_parton_eta = itree->GetLeaf("Particle.Eta")->GetValue(q2idx);
+	d2_parton_phi = itree->GetLeaf("Particle.Phi")->GetValue(q2idx);
+	d2_parton_e = itree->GetLeaf("Particle.E")->GetValue(q2idx);
+        if (debug) {
+          std::cout << "\tq1 : pt=" << q1.Pt()  << " eta=" << q1.Eta() << " phi=" << q1.Phi() << " pgdId=" << itree->GetLeaf("Particle.PID")->GetValue(q1idx) << std::endl;
+          std::cout << "\tq2 : pt=" << q2.Pt()  << " eta=" << q2.Eta() << " phi=" << q2.Phi() << " pgdId=" << itree->GetLeaf("Particle.PID")->GetValue(q2idx) << std::endl;
+          std::cout << "\tdeltaR Z'/deltaR q1/deltaR q2" << tmp.DeltaR(zprime) << "/" << tmp.DeltaR(q1) << "/" << tmp.DeltaR(q2) << std::endl;
+        }
 	if ((tmp.DeltaR(zprime)<0.5) && (tmp.DeltaR(q1)<0.8) && (tmp.DeltaR(q2)<0.8)) {
 	  jettype = 1.;
+          if (debug) {
+            std::cout << "Jet matched to Z'; exiting loop" << std::endl; 
+          }
 	}
       }
       else {
-	  jettype = 0.; 
+	  jettype = 0.;
+          if (debug) {
+            std::cout << "QCD jet; exiting on first one" << std::endl;
+          }
       } 
       
       //std::cout <<"here2"<<std::endl;
       if (jettype>-1.){
-	//std::cout << jettype << std::endl;
-        //outfile << jettype << "\n";
 
 	fastjet::PseudoJet sdJet = (softDrop)(jet);
 
@@ -325,19 +360,16 @@ int main(int argc, char *argv[])
 	jet_phi = tmp.Phi();
 	jet_e = tmp.E();
 	jet_msd = sdJet.m();
+	jet_m = tmp.M();
 
 	//cout << N2fj(jet) << endl;
 
 	jet_n2 = N2fj(jet);
-	//cout << "Before/after softdrop: " << jet.constituents().size() << " / " << sdJet.constituents().size() << endl;
 
-	// fill constituents
-        //std::cout <<jet.constituents().size() << std::endl;	
         output_particles.clear();
 	for (auto &c: sorted_by_pt(jet.constituents())){
 	  output_particles.push_back(input_particles.at(c.user_index()));
 	}
-        std::cout << "output_particles.size()" << output_particles.size() << std::endl;
 	output_particles.resize(NMAX);
 	
 	fill(vpt, output_particles, [](PFCand& p) { return p.pt; });
@@ -350,6 +382,7 @@ int main(int argc, char *argv[])
 	fill(vdz, output_particles, [](PFCand& p) { return p.dz; });
 
 	tout->Fill();
+        break;
       }
       //if (jettype > -1) break;
       //if (dau1_parton_pt > 0.) break;
