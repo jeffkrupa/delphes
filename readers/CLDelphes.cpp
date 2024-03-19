@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
         std::cout << "JET loop: " << jetidx << " PT:"<< jet.perp() << " ETA:" << jet.eta() << std::endl;
       }
       ++jetidx;
-      if (jet.perp() < minpt || abs(jet.eta()) > maxeta || jet.m() > minmass)
+      if (jet.perp() < minpt || abs(jet.eta()) > maxeta || jet.m() < minmass)
 	break;
 
       output_particles.clear();
